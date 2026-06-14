@@ -1,0 +1,51 @@
+backend/.venv/
+frontend/node_modules/
+frontend/dist/
+
+# OS/editor metadata.
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Local runtime data and generated artifacts.
+backend/data/
+dist/
+build/
+tmp/
+output/
+logs/
+.logs/
+
+# Desktop/.NET outputs.
+desktop/**/bin/
+desktop/**/obj/
+desktop/AIHomeDashboard.Installer/Payload/
+
+# Python caches.
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Local environment files.
+.env
+.env.*
+
+# Defense-in-depth: databases and credentials anywhere in the tree.
+**/dashboard*.db
+*.db
+*.db-journal
+**/google-client-secret.json
+**/google-calendar-client-secret.json
+**/gmail-client-secret.json
+**/gmail-token.json
+**/google-calendar-token.json
+**/apple-calendar.json
+**/*-token.json
+**/*.pem
+**/*.key
+**/client_secret*.json
+*.sqlite
+*.sqlite3

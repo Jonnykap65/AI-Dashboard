@@ -1,0 +1,389 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --color-bg: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-text: #17202a;
+  --color-muted: #64748b;
+  --color-line: #dce3ee;
+  --color-accent: #1f6f5b;
+  --color-accent-hover: #155443;
+  --color-accent-soft: #e7f5ef;
+  --color-accent-text: #0f4a3c;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html[data-theme="classic-light"] {
+  --color-bg: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-text: #17202a;
+  --color-muted: #64748b;
+  --color-line: #dce3ee;
+  --color-accent: #1f6f5b;
+  --color-accent-hover: #155443;
+  --color-accent-soft: #e7f5ef;
+  --color-accent-text: #0f4a3c;
+}
+
+html[data-theme="classic-dark"] {
+  --color-bg: #14181d;
+  --color-surface: #1f2937;
+  --color-surface-muted: #111827;
+  --color-text: #eef2f6;
+  --color-muted: #94a3b8;
+  --color-line: #334155;
+  --color-accent: #1f8f72;
+  --color-accent-hover: #22a682;
+  --color-accent-soft: #063d32;
+  --color-accent-text: #a7f3d0;
+}
+
+html[data-theme="void-light"] {
+  --color-bg: #f7f4ff;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f0edff;
+  --color-text: #211a3f;
+  --color-muted: #6d668b;
+  --color-line: #d9d0ff;
+  --color-accent: #6d5df5;
+  --color-accent-hover: #5845d9;
+  --color-accent-soft: #ece8ff;
+  --color-accent-text: #3f32a6;
+}
+
+html[data-theme="void-dark"] {
+  --color-bg: #0d1028;
+  --color-surface: #151a3a;
+  --color-surface-muted: #0a0d21;
+  --color-text: #f2f0ff;
+  --color-muted: #a9a4d6;
+  --color-line: #2d3771;
+  --color-accent: #6957f5;
+  --color-accent-hover: #7b6cff;
+  --color-accent-soft: #211865;
+  --color-accent-text: #d9d4ff;
+}
+
+html[data-theme="ocean-light"] {
+  --color-bg: #eefaff;
+  --color-surface: #ffffff;
+  --color-surface-muted: #e4f6fc;
+  --color-text: #102b3a;
+  --color-muted: #527386;
+  --color-line: #b8e5f2;
+  --color-accent: #0897c5;
+  --color-accent-hover: #087aa1;
+  --color-accent-soft: #dcf6fd;
+  --color-accent-text: #075f80;
+}
+
+html[data-theme="ocean-dark"] {
+  --color-bg: #061b2e;
+  --color-surface: #0b2a42;
+  --color-surface-muted: #041421;
+  --color-text: #e8f9ff;
+  --color-muted: #85bdd1;
+  --color-line: #164862;
+  --color-accent: #00bde8;
+  --color-accent-hover: #22d2f7;
+  --color-accent-soft: #06435a;
+  --color-accent-text: #b9f4ff;
+}
+
+html[data-theme="synthwave-light"] {
+  --color-bg: #fff3f8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #ffe7f1;
+  --color-text: #321528;
+  --color-muted: #81536c;
+  --color-line: #ffc3dc;
+  --color-accent: #ef2d73;
+  --color-accent-hover: #cf1c5e;
+  --color-accent-soft: #ffe1ee;
+  --color-accent-text: #a71248;
+}
+
+html[data-theme="synthwave-dark"] {
+  --color-bg: #15091f;
+  --color-surface: #24102f;
+  --color-surface-muted: #100617;
+  --color-text: #fff0f7;
+  --color-muted: #d695b7;
+  --color-line: #4c1d5e;
+  --color-accent: #ff2b7a;
+  --color-accent-hover: #ff5795;
+  --color-accent-soft: #52112d;
+  --color-accent-text: #ffd1e2;
+}
+
+html[data-theme="forest-light"] {
+  --color-bg: #f0fbf3;
+  --color-surface: #ffffff;
+  --color-surface-muted: #e4f8ea;
+  --color-text: #102619;
+  --color-muted: #54715f;
+  --color-line: #bce5c8;
+  --color-accent: #16a05d;
+  --color-accent-hover: #0e7f49;
+  --color-accent-soft: #ddf7e7;
+  --color-accent-text: #09643a;
+}
+
+html[data-theme="forest-dark"] {
+  --color-bg: #071d16;
+  --color-surface: #0d2b20;
+  --color-surface-muted: #04140f;
+  --color-text: #ecfff4;
+  --color-muted: #91c9a9;
+  --color-line: #1b513c;
+  --color-accent: #19c86f;
+  --color-accent-hover: #35dc89;
+  --color-accent-soft: #08452b;
+  --color-accent-text: #bdf7d3;
+}
+
+html[data-theme="ember-light"] {
+  --color-bg: #fff7ed;
+  --color-surface: #ffffff;
+  --color-surface-muted: #ffedda;
+  --color-text: #321b0d;
+  --color-muted: #8a6040;
+  --color-line: #ffd2a8;
+  --color-accent: #f47a16;
+  --color-accent-hover: #cf5f05;
+  --color-accent-soft: #ffe6cc;
+  --color-accent-text: #9a4100;
+}
+
+html[data-theme="ember-dark"] {
+  --color-bg: #201006;
+  --color-surface: #331b0b;
+  --color-surface-muted: #160904;
+  --color-text: #fff3e6;
+  --color-muted: #d9a77b;
+  --color-line: #65310e;
+  --color-accent: #ff781f;
+  --color-accent-hover: #ff9348;
+  --color-accent-soft: #612907;
+  --color-accent-text: #ffd7b2;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.dark body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+@layer components {
+  .card {
+    @apply rounded-lg border border-line bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-medium text-ink transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
+  }
+
+  .btn-primary {
+    @apply border-pine bg-pine text-white hover:border-pine hover:bg-emerald-800 dark:border-emerald-600 dark:bg-emerald-700 dark:hover:bg-emerald-600;
+  }
+
+  .btn-danger {
+    @apply border-coral text-coral hover:bg-red-50 dark:border-red-500 dark:text-red-300 dark:hover:bg-red-950;
+  }
+
+  .input {
+    @apply w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine focus:ring-2 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-emerald-900;
+  }
+
+  .label {
+    @apply text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400;
+  }
+}
+
+html[data-theme] .card {
+  background: var(--color-surface);
+  border-color: var(--color-line);
+  color: var(--color-text);
+}
+
+html[data-theme] aside {
+  background: var(--color-surface);
+  border-color: var(--color-line);
+}
+
+html[data-theme] .btn {
+  background: var(--color-surface);
+  border-color: var(--color-line);
+  color: var(--color-text);
+}
+
+html[data-theme] .btn:hover {
+  background: var(--color-surface-muted);
+  border-color: var(--color-accent);
+}
+
+html[data-theme] .btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #ffffff;
+}
+
+html[data-theme] .btn-primary:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+html[data-theme] .input {
+  background: var(--color-surface);
+  border-color: var(--color-line);
+  color: var(--color-text);
+}
+
+html[data-theme] .input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-soft);
+}
+
+html[data-theme] .label {
+  color: var(--color-muted);
+}
+
+.metric-panel {
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+  background: var(--color-surface-muted);
+  padding: 0.75rem;
+}
+
+html.dark[data-theme] .metric-panel {
+  background: color-mix(in srgb, var(--color-surface-muted) 82%, #000000 18%);
+  border-color: color-mix(in srgb, var(--color-line) 80%, var(--color-accent) 20%);
+}
+
+html.dark[data-theme] .metric-panel .bg-slate-100,
+html.dark[data-theme] .metric-panel .dark\:bg-slate-800 {
+  background-color: color-mix(in srgb, var(--color-surface) 60%, #000000 40%);
+}
+
+.system-panel,
+.system-table-wrap {
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+  background: var(--color-surface-muted);
+  padding: 0.75rem;
+}
+
+html.dark[data-theme] .system-panel,
+html.dark[data-theme] .system-table-wrap {
+  background: color-mix(in srgb, var(--color-surface-muted) 86%, #000000 14%);
+  border-color: color-mix(in srgb, var(--color-line) 82%, var(--color-accent) 18%);
+}
+
+.system-table thead {
+  border-color: var(--color-line);
+}
+
+.system-table tbody tr {
+  border-color: var(--color-line);
+}
+
+html.dark[data-theme] .system-table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--color-surface) 72%, #000000 28%);
+}
+
+html.dark[data-theme] .system-table tbody tr:hover {
+  background: color-mix(in srgb, var(--color-accent-soft) 55%, var(--color-surface) 45%);
+}
+
+html.dark[data-theme] .card [class*="rounded"][class*="border"]:not(.btn):not(.input):not(.theme-choice):not(.metric-panel):not(.system-panel):not(.system-table-wrap):not([class*="border-red"]):not([class*="border-emerald"]):not([class*="border-pine"]) {
+  background-color: color-mix(in srgb, var(--color-surface-muted) 84%, #000000 16%);
+  border-color: color-mix(in srgb, var(--color-line) 82%, var(--color-accent) 18%);
+}
+
+html.dark[data-theme] .card [class*="bg-slate-50"]:not(.btn):not(.input):not(.metric-panel):not(.system-panel):not(.system-table-wrap),
+html.dark[data-theme] .card [class*="dark:bg-slate-950"]:not(.btn):not(.input):not(.metric-panel):not(.system-panel):not(.system-table-wrap),
+html.dark[data-theme] .card [class*="dark:bg-slate-900"]:not(.btn):not(.input):not(.metric-panel):not(.system-panel):not(.system-table-wrap) {
+  background-color: color-mix(in srgb, var(--color-surface-muted) 80%, #000000 20%);
+}
+
+html.dark[data-theme] .card :is(thead, tbody tr, [class*="border-b"], [class*="border-t"], [class*="border-r"], [class*="border-l"]):not(.theme-choice) {
+  border-color: color-mix(in srgb, var(--color-line) 86%, var(--color-accent) 14%);
+}
+
+html.dark[data-theme] .card .overflow-x-auto:has(table) {
+  border: 1px solid color-mix(in srgb, var(--color-line) 82%, var(--color-accent) 18%);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--color-surface-muted) 86%, #000000 14%);
+  padding: 0.75rem;
+}
+
+html.dark[data-theme] .card table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--color-surface) 72%, #000000 28%);
+}
+
+html.dark[data-theme] .card table tbody tr:hover {
+  background: color-mix(in srgb, var(--color-accent-soft) 55%, var(--color-surface) 45%);
+}
+
+.theme-choice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 4rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface-muted);
+  padding: 0.75rem;
+  color: var(--color-text);
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.theme-choice:hover,
+.theme-choice-selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.theme-choice-selected {
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.theme-swatch {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--color-line) 75%, transparent);
+  background: linear-gradient(135deg, var(--swatch-bg) 0 49%, var(--swatch-accent) 50% 100%);
+}
+
+.theme-radio {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-line);
+  background: transparent;
+}
+
+.theme-choice-selected .theme-radio {
+  border-color: var(--color-accent);
+  background: radial-gradient(circle, #ffffff 0 22%, var(--color-accent) 25% 100%);
+}

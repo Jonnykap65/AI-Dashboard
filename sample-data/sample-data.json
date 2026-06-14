@@ -1,0 +1,94 @@
+{
+  "calendar_items": [
+    {
+      "title": "Morning planning",
+      "date": "2026-04-29",
+      "start_time": "08:30",
+      "end_time": "08:45",
+      "location": "",
+      "notes": "Review the dashboard and choose daily focus.",
+      "category": "Personal"
+    }
+  ],
+  "reminders": [
+    {
+      "title": "Submit expense receipt",
+      "due_date": "2026-04-29",
+      "due_time": "17:00",
+      "priority": "high",
+      "notes": "Attach PDF receipt.",
+      "status": "open"
+    }
+  ],
+  "bills": [
+    {
+      "name": "Internet",
+      "amount": 79.99,
+      "due_date": "2026-05-04",
+      "billing_cycle": "monthly",
+      "category": "Utilities",
+      "autopay": true,
+      "url": "https://example.com",
+      "notes": "Autopay enabled.",
+      "status": "active"
+    }
+  ],
+  "chores": [
+    {
+      "title": "Kitchen reset",
+      "room": "Kitchen",
+      "recurrence": "daily",
+      "due_date": "2026-04-29",
+      "priority": "medium",
+      "notes": "Counters, sink, trash.",
+      "status": "open"
+    }
+  ],
+  "notes": [
+    {
+      "title": "Dinner ideas",
+      "body": "Tacos, stir fry, sheet-pan chicken.",
+      "tags": "home,food",
+      "pinned": true
+    }
+  ],
+  "quick_links": [
+    {
+      "name": "Router admin",
+      "url": "http://example.local",
+      "category": "Home IT",
+      "notes": "Local network only."
+    }
+  ],
+  "projects": [
+    {
+      "name": "AI Home Dashboard",
+      "status": "active",
+      "priority": "high",
+      "due_date": "2026-05-06",
+      "codex_workspace_path": "C:\\Projects\\AI-Dashboard",
+      "repository_url": "https://github.com/example/ai-home-dashboard",
+      "description": "Local-first dashboard built with Codex.",
+      "next_step": "Review MVP workflows and tighten project tracking.",
+      "notes": "Track build status, repo location, and the next Codex task here."
+    }
+  ],
+  "project_tasks": [
+    {
+      "title": "Review project task template",
+      "project_name": "AI Home Dashboard",
+      "due_date": "2026-05-01",
+      "due_time": "16:00",
+      "priority": "high",
+      "status": "open",
+      "codex_prompt": "Verify the Projects page supports local project tasks without calendar linkage.",
+      "notes": "Modeled after reminders but scoped to Codex project work."
+    }
+  ],
+  "settings": {
+    "display_name": "Home",
+    "enabled_sections": "weather,agenda,reminders,bills,chores,projects,notes,links,focus,ai",
+    "time_format": "12h",
+    "theme": "system"
+  }
+}

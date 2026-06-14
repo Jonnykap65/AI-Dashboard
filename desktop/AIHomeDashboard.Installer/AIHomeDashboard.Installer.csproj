@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>AIHomeDashboardInstaller</AssemblyName>
+    <ApplicationIcon>..\AIHomeDashboard.Desktop\Assets\AIHomeDashboard.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="..\AIHomeDashboard.Desktop\Assets\AIHomeDashboard.ico" />
+    <EmbeddedResource Include="Payload\AIHomeDashboardPayload.zip" LogicalName="AIHomeDashboardPayload.zip" Condition="Exists('Payload\AIHomeDashboardPayload.zip')" />
+  </ItemGroup>
+</Project>
