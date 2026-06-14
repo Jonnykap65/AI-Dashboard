@@ -363,7 +363,7 @@ export default function SettingsPage({ onSaved }) {
       </Card>
       <Card title="Copyright">
         <div className="grid gap-2 text-sm text-slate-600 dark:text-slate-300">
-          <p className="font-medium text-slate-900 dark:text-slate-100">Copyright © 2026 Jon Kaplan</p>
+          <p className="font-medium text-slate-900 dark:text-slate-100">Copyright © 2026 Jonathan Kaplan</p>
           <p>Licensed under the MIT License.</p>
           <p>Developed by Jonathan Kaplan with assistance from OpenAI Codex.</p>
         </div>
