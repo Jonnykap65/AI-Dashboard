@@ -339,6 +339,12 @@ Use broader scopes only when a specific future feature requires them, such as dr
 - The `/api/tools/*` endpoints for ping, port-check, DNS, certificate checks, and speed tests make outbound requests to caller-supplied hosts or URLs. On loopback this only touches the local machine. If the API is ever exposed, these endpoints become an SSRF and internal-network-scan surface. Add authentication and restrict outbound targets before any non-local deployment.
 - Secrets, including Google OAuth client JSON, Apple app-specific passwords, and OAuth tokens, are stored as local files under `backend/config` and `backend/data`. These paths are git-ignored and must not be committed.
 
+## Copyright
+
+© 2026 Jonathan Kaplan.
+
+Developed by Jonathan Kaplan with assistance from OpenAI Codex.
+
 ## Notes
 
 - The backend is intended for local use and binds to `127.0.0.1` in the setup commands.
