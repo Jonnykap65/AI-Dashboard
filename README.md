@@ -345,6 +345,14 @@ Use broader scopes only when a specific future feature requires them, such as dr
 
 Developed by Jonathan Kaplan with assistance from OpenAI Codex.
 
+## License
+
+This project is licensed under the MIT License.
+
+Copyright (c) 2026 Jonathan Kaplan.
+
+See the LICENSE file for details.
+
 ## Notes
 
 - The backend is intended for local use and binds to `127.0.0.1` in the setup commands.
