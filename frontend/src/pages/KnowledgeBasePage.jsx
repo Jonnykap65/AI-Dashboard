@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, Upload } from 'lucide-react';
+import { ChevronDown, Download, Upload } from 'lucide-react';
 import EntityForm from '../components/EntityForm.jsx';
 import { Badge, Card, EmptyState, ErrorBox, Icons, Loading } from '../components/ui.jsx';
 import { api, downloadUrl } from '../lib/api.js';
@@ -58,6 +58,8 @@ export default function KnowledgeBasePage() {
   const [linkImportResults, setLinkImportResults] = useState([]);
   const [selectedArticleId, setSelectedArticleId] = useState(null);
   const [selectedLinkId, setSelectedLinkId] = useState(null);
+  const [showLinkTransfer, setShowLinkTransfer] = useState(false);
+  const [showArticleTransfer, setShowArticleTransfer] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -428,91 +430,123 @@ export default function KnowledgeBasePage() {
         )}
       </Card>
       <Card title="Link import/export">
-        <div className="grid gap-4">
-          {linkImportMessage && <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{linkImportMessage}</div>}
-          <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold">Export links</p>
-                <p className="text-xs text-slate-500">Downloads use Name, URL, Category, Environment, Tags, Favorite, Body.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button className="btn" onClick={() => downloadUrl('/api/export/links.csv')}>
-                  <Download className="h-4 w-4" /> CSV
-                </button>
-                <button className="btn" onClick={() => downloadUrl('/api/export/links.xlsx')}>
-                  <Download className="h-4 w-4" /> XLSX
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+        <div className="rounded-md border border-line dark:border-slate-800">
+          <button
+            className="flex w-full items-center justify-between gap-3 p-3 text-left"
+            type="button"
+            onClick={() => setShowLinkTransfer((value) => !value)}
+            aria-expanded={showLinkTransfer}
+          >
             <div>
-              <p className="text-sm font-semibold">Import links</p>
-              <p className="text-xs text-slate-500">Accepted environments: {linkConfig.fields.find((field) => field.name === 'environment').options.join(', ')}. Favorite must be TRUE or FALSE.</p>
+              <p className="text-sm font-semibold">Link import/export</p>
+              <p className="text-xs text-slate-500">Import links from a file, or download current link records.</p>
             </div>
-            <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-              <input
-                className="input"
-                type="file"
-                accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                onChange={(event) => setSelectedLinkFile(event.target.files?.[0] || null)}
-              />
-              <button className="btn btn-primary" onClick={importLinks} disabled={importingLinks}>
-                <Upload className="h-4 w-4" /> Import file
-              </button>
-            </div>
-          </div>
-          {linkImportResults.length > 0 && (
-            <div className="rounded-md border border-line p-3 text-sm dark:border-slate-800">
-              <p className="font-semibold">Recent link imports</p>
-              <div className="mt-2 grid gap-1 text-slate-600 dark:text-slate-300">
-                {linkImportResults.map((result, index) => (
-                  <p key={`${result.filename}-${result.imported_at}-${index}`}>
-                    {result.imported_at}: {result.summary}
-                  </p>
-                ))}
+            <ChevronDown className={`h-4 w-4 shrink-0 transition ${showLinkTransfer ? 'rotate-180' : ''}`} />
+          </button>
+          {showLinkTransfer && (
+            <div className="grid gap-4 border-t border-line p-3 dark:border-slate-800">
+              {linkImportMessage && <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{linkImportMessage}</div>}
+              <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold">Export links</p>
+                    <p className="text-xs text-slate-500">Downloads use Name, URL, Category, Environment, Tags, Favorite, Body.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="btn" onClick={() => downloadUrl('/api/export/links.csv')}>
+                      <Download className="h-4 w-4" /> CSV
+                    </button>
+                    <button className="btn" onClick={() => downloadUrl('/api/export/links.xlsx')}>
+                      <Download className="h-4 w-4" /> XLSX
+                    </button>
+                  </div>
+                </div>
               </div>
+              <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+                <div>
+                  <p className="text-sm font-semibold">Import links</p>
+                  <p className="text-xs text-slate-500">Accepted environments: {linkConfig.fields.find((field) => field.name === 'environment').options.join(', ')}. Favorite must be TRUE or FALSE.</p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+                  <input
+                    className="input"
+                    type="file"
+                    accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    onChange={(event) => setSelectedLinkFile(event.target.files?.[0] || null)}
+                  />
+                  <button className="btn btn-primary" onClick={importLinks} disabled={importingLinks}>
+                    <Upload className="h-4 w-4" /> Import file
+                  </button>
+                </div>
+              </div>
+              {linkImportResults.length > 0 && (
+                <div className="rounded-md border border-line p-3 text-sm dark:border-slate-800">
+                  <p className="font-semibold">Recent link imports</p>
+                  <div className="mt-2 grid gap-1 text-slate-600 dark:text-slate-300">
+                    {linkImportResults.map((result, index) => (
+                      <p key={`${result.filename}-${result.imported_at}-${index}`}>
+                        {result.imported_at}: {result.summary}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
       </Card>
       <Card title="Article import/export">
-        <div className="grid gap-4">
-          {importMessage && <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{importMessage}</div>}
-          <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold">Export articles</p>
-                <p className="text-xs text-slate-500">Downloads use Title, Category, Tags, Pinned, Body.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button className="btn" onClick={() => downloadUrl('/api/export/notes.csv')}>
-                  <Download className="h-4 w-4" /> CSV
-                </button>
-                <button className="btn" onClick={() => downloadUrl('/api/export/notes.xlsx')}>
-                  <Download className="h-4 w-4" /> XLSX
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+        <div className="rounded-md border border-line dark:border-slate-800">
+          <button
+            className="flex w-full items-center justify-between gap-3 p-3 text-left"
+            type="button"
+            onClick={() => setShowArticleTransfer((value) => !value)}
+            aria-expanded={showArticleTransfer}
+          >
             <div>
-              <p className="text-sm font-semibold">Import articles</p>
-              <p className="text-xs text-slate-500">Accepted categories: {config.fields.find((field) => field.name === 'note_type').options.join(', ')}. Pinned must be TRUE or FALSE.</p>
+              <p className="text-sm font-semibold">Article import/export</p>
+              <p className="text-xs text-slate-500">Import articles from a file, or download current article records.</p>
             </div>
-            <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-              <input
-                className="input"
-                type="file"
-                accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                onChange={(event) => setSelectedArticleFile(event.target.files?.[0] || null)}
-              />
-              <button className="btn btn-primary" onClick={importArticles} disabled={importingArticles}>
-                <Upload className="h-4 w-4" /> Import file
-              </button>
+            <ChevronDown className={`h-4 w-4 shrink-0 transition ${showArticleTransfer ? 'rotate-180' : ''}`} />
+          </button>
+          {showArticleTransfer && (
+            <div className="grid gap-4 border-t border-line p-3 dark:border-slate-800">
+              {importMessage && <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{importMessage}</div>}
+              <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold">Export articles</p>
+                    <p className="text-xs text-slate-500">Downloads use Title, Category, Tags, Pinned, Body.</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="btn" onClick={() => downloadUrl('/api/export/notes.csv')}>
+                      <Download className="h-4 w-4" /> CSV
+                    </button>
+                    <button className="btn" onClick={() => downloadUrl('/api/export/notes.xlsx')}>
+                      <Download className="h-4 w-4" /> XLSX
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+                <div>
+                  <p className="text-sm font-semibold">Import articles</p>
+                  <p className="text-xs text-slate-500">Accepted categories: {config.fields.find((field) => field.name === 'note_type').options.join(', ')}. Pinned must be TRUE or FALSE.</p>
+                </div>
+                <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+                  <input
+                    className="input"
+                    type="file"
+                    accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    onChange={(event) => setSelectedArticleFile(event.target.files?.[0] || null)}
+                  />
+                  <button className="btn btn-primary" onClick={importArticles} disabled={importingArticles}>
+                    <Upload className="h-4 w-4" /> Import file
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </Card>
     </div>

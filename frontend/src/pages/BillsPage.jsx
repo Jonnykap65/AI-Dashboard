@@ -31,47 +31,35 @@ function buildGmailQuery({ daysBack, terms, senderFilter, subjectFilter, hasAtta
   return parts.join(' ');
 }
 
-function parseLocalDate(value) {
-  if (!value) return null;
-  const [year, month, day] = String(value).split('-').map(Number);
-  if (!year || !month || !day) return null;
-  return new Date(year, month - 1, day);
-}
-
 function billAmount(item) {
   return Number(item.amount || 0);
 }
 
-function isDueBy(date, today) {
-  return date && date <= today;
-}
-
-function isSameMonth(date, today) {
-  return date && date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth();
-}
-
-function isSameYear(date, today) {
-  return date && date.getFullYear() === today.getFullYear();
-}
-
-function paidToDateAmount(item, today, period) {
-  const dueDate = parseLocalDate(item.due_date);
-  if (!isDueBy(dueDate, today)) return 0;
-  if (period === 'month' && !isSameMonth(dueDate, today)) return 0;
-  if (period === 'year' && !isSameYear(dueDate, today)) return 0;
-  return billAmount(item);
+function annualizedAmount(item) {
+  const amount = billAmount(item);
+  if (item.billing_cycle === 'weekly') return amount * 52;
+  if (item.billing_cycle === 'monthly') return amount * 12;
+  if (item.billing_cycle === 'quarterly') return amount * 4;
+  if (item.billing_cycle === 'yearly') return amount;
+  return amount;
 }
 
 function BillingChart({ bills, loading }) {
   const summary = useMemo(() => {
-    const today = new Date();
-    const monthlyTotal = bills.reduce((total, bill) => total + paidToDateAmount(bill, today, 'month'), 0);
-    const yearlyTotal = bills.reduce((total, bill) => total + paidToDateAmount(bill, today, 'year'), 0);
-    const monthlyPaidToDate = bills
+    const monthlyTotal = bills
       .filter((bill) => bill.billing_cycle === 'monthly')
-      .reduce((total, bill) => total + paidToDateAmount(bill, today, 'month'), 0);
-    const bars = [{ cycle: 'monthly', value: monthlyPaidToDate }];
-    return { monthlyTotal, yearlyTotal, recordCount: bills.length, bars };
+      .reduce((total, bill) => total + billAmount(bill), 0);
+    const monthlyAnnualTotal = bills
+      .filter((bill) => bill.billing_cycle === 'monthly')
+      .reduce((total, bill) => total + annualizedAmount(bill), 0);
+    const yearlyAnnualTotal = bills
+      .filter((bill) => bill.billing_cycle === 'yearly')
+      .reduce((total, bill) => total + annualizedAmount(bill), 0);
+    const bars = [
+      { cycle: 'monthly', label: 'monthly annualized', value: monthlyAnnualTotal },
+      { cycle: 'yearly', label: 'yearly annual total', value: yearlyAnnualTotal }
+    ];
+    return { monthlyTotal, monthlyAnnualTotal, yearlyAnnualTotal, recordCount: bills.length, bars };
   }, [bills]);
   const max = Math.max(...summary.bars.map((item) => item.value), 1);
 
@@ -80,9 +68,10 @@ function BillingChart({ bills, loading }) {
 
   return (
     <div className="grid gap-4">
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-4">
         <Metric label="Monthly equivalent" value={`$${summary.monthlyTotal.toFixed(2)}`} />
-        <Metric label="Annual total" value={`$${summary.yearlyTotal.toFixed(2)}`} />
+        <Metric label="Monthly annual total" value={`$${summary.monthlyAnnualTotal.toFixed(2)}`} />
+        <Metric label="Yearly annual total" value={`$${summary.yearlyAnnualTotal.toFixed(2)}`} />
         <Metric label="Bill records" value={summary.recordCount} />
       </div>
       <div className="grid gap-3">
@@ -91,7 +80,7 @@ function BillingChart({ bills, loading }) {
             <div className="mb-2 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Badge tone="muted">{item.cycle}</Badge>
-                <span className="text-sm text-slate-500">paid this month so far</span>
+                <span className="text-sm text-slate-500">{item.label}</span>
               </div>
               <span className="font-semibold tabular-nums">${item.value.toFixed(2)}</span>
             </div>

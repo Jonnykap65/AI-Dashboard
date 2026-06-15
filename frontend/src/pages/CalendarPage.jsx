@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarSync, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { CalendarSync, ChevronDown, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { Badge, Card, ErrorBox, Loading } from '../components/ui.jsx';
 import { api } from '../lib/api.js';
 
@@ -235,6 +235,7 @@ export default function CalendarPage() {
   const [appleCalendarName, setAppleCalendarName] = useState('');
   const [daysForward, setDaysForward] = useState(30);
   const [appleDaysForward, setAppleDaysForward] = useState(30);
+  const [showCalendarSync, setShowCalendarSync] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -343,59 +344,81 @@ export default function CalendarPage() {
           controls={calendarControls}
         />
       )}
-      <Card title="Google Calendar Sync">
-        <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-          <div className="grid gap-3 md:grid-cols-3">
-            <label className="grid gap-1">
-              <span className="label">Calendar ID</span>
-              <input className="input" value={calendarId} onChange={(event) => setCalendarId(event.target.value)} />
-            </label>
-            <label className="grid gap-1">
-              <span className="label">Days forward</span>
-              <input className="input" type="number" min="1" max="730" value={daysForward} onChange={(event) => setDaysForward(event.target.value)} />
-            </label>
-            <div className="grid gap-1">
-              <span className="label">Status</span>
-              <div className="rounded-md border border-line px-3 py-2 text-sm dark:border-slate-700">
-                {status?.configured ? 'Client file found' : 'Client file missing'} · {status?.connected ? 'Connected' : 'Not connected'}
-              </div>
+      <Card title="Calendar Sync">
+        <div className="rounded-md border border-line dark:border-slate-800">
+          <button
+            className="flex w-full items-center justify-between gap-3 p-3 text-left"
+            type="button"
+            onClick={() => setShowCalendarSync((value) => !value)}
+            aria-expanded={showCalendarSync}
+          >
+            <div>
+              <p className="text-sm font-semibold">Google and Apple Calendar Sync</p>
+              <p className="text-xs text-slate-500">Configure sync windows and run connected calendar imports.</p>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button className="btn btn-primary" onClick={sync} disabled={!status?.connected}><RefreshCw className="h-4 w-4" /> Sync</button>
-          </div>
-        </div>
-        <p className="mt-3 text-sm text-slate-500">
-          Uses read-only Google Calendar access. Save the shared Google OAuth client JSON and connect Calendar in Settings before syncing.
-        </p>
-        {message && <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{message}</p>}
-        <div className="mt-3"><ErrorBox message={error} /></div>
-      </Card>
-      <Card title="Apple Calendar Sync">
-        <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-          <div className="grid gap-3 md:grid-cols-3">
-            <label className="grid gap-1">
-              <span className="label">Calendar name</span>
-              <input className="input" value={appleCalendarName} onChange={(event) => setAppleCalendarName(event.target.value)} placeholder="Leave blank for all" />
-            </label>
-            <label className="grid gap-1">
-              <span className="label">Days forward</span>
-              <input className="input" type="number" min="1" max="730" value={appleDaysForward} onChange={(event) => setAppleDaysForward(event.target.value)} />
-            </label>
-            <div className="grid gap-1">
-              <span className="label">Status</span>
-              <div className="rounded-md border border-line px-3 py-2 text-sm dark:border-slate-700">
-                {appleStatus?.configured ? 'Config file found' : 'Config file missing'} · CalDAV read-only
-              </div>
+            <ChevronDown className={`h-4 w-4 shrink-0 transition ${showCalendarSync ? 'rotate-180' : ''}`} />
+          </button>
+          {showCalendarSync && (
+            <div className="grid gap-4 border-t border-line p-3 dark:border-slate-800">
+              <section className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+                <p className="text-sm font-semibold">Google Calendar Sync</p>
+                <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                  <div className="grid gap-3 md:grid-cols-3">
+                    <label className="grid gap-1">
+                      <span className="label">Calendar ID</span>
+                      <input className="input" value={calendarId} onChange={(event) => setCalendarId(event.target.value)} />
+                    </label>
+                    <label className="grid gap-1">
+                      <span className="label">Days forward</span>
+                      <input className="input" type="number" min="1" max="730" value={daysForward} onChange={(event) => setDaysForward(event.target.value)} />
+                    </label>
+                    <div className="grid gap-1">
+                      <span className="label">Status</span>
+                      <div className="rounded-md border border-line px-3 py-2 text-sm dark:border-slate-700">
+                        {status?.configured ? 'Client file found' : 'Client file missing'} · {status?.connected ? 'Connected' : 'Not connected'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="btn btn-primary" onClick={sync} disabled={!status?.connected}><RefreshCw className="h-4 w-4" /> Sync</button>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500">
+                  Uses read-only Google Calendar access. Save the shared Google OAuth client JSON and connect Calendar in Settings before syncing.
+                </p>
+              </section>
+              <section className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+                <p className="text-sm font-semibold">Apple Calendar Sync</p>
+                <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                  <div className="grid gap-3 md:grid-cols-3">
+                    <label className="grid gap-1">
+                      <span className="label">Calendar name</span>
+                      <input className="input" value={appleCalendarName} onChange={(event) => setAppleCalendarName(event.target.value)} placeholder="Leave blank for all" />
+                    </label>
+                    <label className="grid gap-1">
+                      <span className="label">Days forward</span>
+                      <input className="input" type="number" min="1" max="730" value={appleDaysForward} onChange={(event) => setAppleDaysForward(event.target.value)} />
+                    </label>
+                    <div className="grid gap-1">
+                      <span className="label">Status</span>
+                      <div className="rounded-md border border-line px-3 py-2 text-sm dark:border-slate-700">
+                        {appleStatus?.configured ? 'Config file found' : 'Config file missing'} · CalDAV read-only
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="btn btn-primary" onClick={syncApple} disabled={!appleStatus?.configured}><CalendarSync className="h-4 w-4" /> Sync Apple</button>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-500">
+                  Uses iCloud CalDAV with an Apple app-specific password. Save credentials in <code>backend\config\apple-calendar.json</code>. Leave calendar name blank to sync all visible calendars.
+                </p>
+              </section>
+              {message && <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{message}</p>}
+              <ErrorBox message={error} />
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button className="btn btn-primary" onClick={syncApple} disabled={!appleStatus?.configured}><CalendarSync className="h-4 w-4" /> Sync Apple</button>
-          </div>
+          )}
         </div>
-        <p className="mt-3 text-sm text-slate-500">
-          Uses iCloud CalDAV with an Apple app-specific password. Save credentials in <code>backend\config\apple-calendar.json</code>. Leave calendar name blank to sync all visible calendars.
-        </p>
       </Card>
     </div>
   );
