@@ -97,6 +97,7 @@ def backfill_calendar_reminders(db: Session) -> dict[str, int]:
         payload = {
             "title": item.title,
             "date": item.date,
+            "end_date": item.end_date,
             "start_time": item.start_time,
             "location": item.location,
             "notes": item.notes,

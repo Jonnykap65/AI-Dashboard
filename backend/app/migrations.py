@@ -3,6 +3,7 @@ from sqlalchemy.engine import Engine
 
 
 CALENDAR_COLUMNS = {
+    "end_date": "VARCHAR(10)",
     "source": "VARCHAR(40) DEFAULT 'manual'",
     "external_id": "VARCHAR(240)",
     "source_calendar_id": "VARCHAR(240)",
@@ -72,6 +73,7 @@ def ensure_schema(engine: Engine):
                 if name not in existing:
                     conn.execute(text(f"ALTER TABLE calendar_items ADD COLUMN {name} {ddl}"))
             conn.execute(text("UPDATE calendar_items SET source = 'manual' WHERE source IS NULL OR source = ''"))
+            conn.execute(text("UPDATE calendar_items SET end_date = date WHERE end_date IS NULL OR end_date = ''"))
 
         if "bills" in tables:
             existing = {column["name"] for column in inspector.get_columns("bills")}

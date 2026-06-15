@@ -568,12 +568,61 @@ def calendar_to_agenda_item(item: models.CalendarItem) -> dict[str, Any]:
     return payload
 
 
+def parse_iso_date_or_none(value: str | None) -> date | None:
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def calendar_to_agenda_items(item: models.CalendarItem, start_date: date, end_date: date) -> list[dict[str, Any]]:
+    payload = calendar_to_agenda_item(item)
+    item_start = parse_iso_date_or_none(payload.get("date"))
+    item_end = parse_iso_date_or_none(payload.get("end_date")) or item_start
+    if item_start is None or item_end is None:
+        return [payload]
+
+    if item_end < item_start:
+        item_end = item_start
+
+    visible_start = max(item_start, start_date)
+    visible_end = min(item_end, end_date)
+    if visible_end < visible_start:
+        return []
+
+    days = (visible_end - visible_start).days + 1
+    if days == 1 and item_start == item_end:
+        payload["end_date"] = item_end.isoformat()
+        return [payload]
+
+    expanded = []
+    for offset in range(days):
+        current = visible_start + timedelta(days=offset)
+        occurrence = dict(payload)
+        occurrence["id"] = f"{payload['id']}:{current.isoformat()}"
+        occurrence["date"] = current.isoformat()
+        occurrence["spans_multiple_days"] = item_end > item_start
+        occurrence["start_date"] = item_start.isoformat()
+        occurrence["end_date"] = item_end.isoformat()
+        if current != item_start:
+            occurrence["start_time"] = None
+        if current != item_end:
+            occurrence["end_time"] = None
+        expanded.append(occurrence)
+    return expanded
+
+
 def combined_agenda(db: Session, start_date: date, end_date: date) -> list[dict[str, Any]]:
     start = start_date.isoformat()
     end = end_date.isoformat()
     calendar_items = db.scalars(
         select(models.CalendarItem)
-        .where(models.CalendarItem.date.between(start, end))
+        .where(
+            models.CalendarItem.date <= end,
+            or_(models.CalendarItem.end_date.is_(None), models.CalendarItem.end_date >= start),
+        )
         .order_by(models.CalendarItem.date, models.CalendarItem.start_time)
     ).all()
     reminders = db.scalars(
@@ -586,7 +635,9 @@ def combined_agenda(db: Session, start_date: date, end_date: date) -> list[dict[
         )
         .order_by(models.Reminder.due_date, models.Reminder.due_time)
     ).all()
-    items = [calendar_to_agenda_item(item) for item in calendar_items]
+    items = []
+    for item in calendar_items:
+        items.extend(calendar_to_agenda_items(item, start_date, end_date))
     items.extend(reminder_to_agenda_item(reminder) for reminder in reminders)
     return sorted(items, key=lambda item: (item["date"] or "9999-99-99", item["start_time"] or "99:99", item["title"]))
 

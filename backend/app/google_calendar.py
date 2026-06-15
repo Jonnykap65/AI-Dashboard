@@ -66,15 +66,24 @@ def strip_html(value: str | None) -> str | None:
     return re.sub(r"\s+", " ", text).strip() or None
 
 
-def parse_google_time(value: dict[str, str]) -> tuple[str, str | None]:
+def parse_google_time(value: dict[str, str]) -> tuple[str, str | None, bool]:
     if "date" in value:
-        return value["date"], None
+        return value["date"], None, True
     raw = value.get("dateTime")
     if not raw:
-        return datetime.now().date().isoformat(), None
+        return datetime.now().date().isoformat(), None, False
     normalized = raw.replace("Z", "+00:00")
     parsed = datetime.fromisoformat(normalized)
-    return parsed.date().isoformat(), parsed.strftime("%H:%M")
+    return parsed.date().isoformat(), parsed.strftime("%H:%M"), False
+
+
+def inclusive_google_end_date(start_date: str, end_date: str, all_day: bool) -> str:
+    if not all_day:
+        return end_date
+    parsed_end = datetime.fromisoformat(end_date).date()
+    parsed_start = datetime.fromisoformat(start_date).date()
+    inclusive_end = max(parsed_start, parsed_end - timedelta(days=1))
+    return inclusive_end.isoformat()
 
 
 def sync_google_calendar(db: Session, calendar_id: str, days_back: int, days_forward: int) -> dict[str, Any]:
@@ -106,8 +115,9 @@ def sync_google_calendar(db: Session, calendar_id: str, days_back: int, days_for
         external_id = event.get("id")
         if not external_id:
             continue
-        start_date, start_time = parse_google_time(event.get("start", {}))
-        _, end_time = parse_google_time(event.get("end", {}))
+        start_date, start_time, start_all_day = parse_google_time(event.get("start", {}))
+        raw_end_date, end_time, end_all_day = parse_google_time(event.get("end", {}))
+        end_date = inclusive_google_end_date(start_date, raw_end_date, start_all_day and end_all_day)
         existing = db.scalars(
             select(CalendarItem).where(
                 CalendarItem.source == "google",
@@ -117,6 +127,7 @@ def sync_google_calendar(db: Session, calendar_id: str, days_back: int, days_for
         payload = {
             "title": event.get("summary") or "(No title)",
             "date": start_date,
+            "end_date": end_date,
             "start_time": start_time,
             "end_time": end_time,
             "location": event.get("location"),

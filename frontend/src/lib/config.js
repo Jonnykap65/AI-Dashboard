@@ -7,13 +7,14 @@ export const entityConfig = {
     fields: [
       { name: 'title', label: 'Title', type: 'text', required: true },
       { name: 'date', label: 'Date', type: 'date', required: true },
+      { name: 'end_date', label: 'End date', type: 'date' },
       { name: 'start_time', label: 'Start time', type: 'time' },
       { name: 'end_time', label: 'End time', type: 'time' },
       { name: 'location', label: 'Location', type: 'text' },
       { name: 'category', label: 'Category', type: 'text' },
       { name: 'notes', label: 'Notes', type: 'textarea' }
     ],
-    empty: { title: '', date: '', start_time: '', end_time: '', location: '', category: '', notes: '' }
+    empty: { title: '', date: '', end_date: '', start_time: '', end_time: '', location: '', category: '', notes: '' }
   },
   bills: {
     label: 'Bills & Subscriptions',

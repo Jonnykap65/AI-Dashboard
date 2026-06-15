@@ -98,6 +98,7 @@ function CalendarControls({ mode, setMode, onPrev, onNext, onToday, periodLabel 
 }
 
 function EventChip({ item }) {
+  const range = item.spans_multiple_days && item.start_date && item.end_date ? `${item.start_date} to ${item.end_date}` : '';
   return (
     <div className="overflow-hidden rounded-md border border-line bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-950">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
@@ -109,6 +110,7 @@ function EventChip({ item }) {
       <p className="mt-1 truncate text-slate-500">
         {item.start_time || 'All day'}{item.end_time ? `-${item.end_time}` : ''}{item.location ? ` · ${item.location}` : ''}
       </p>
+      {range && <p className="mt-1 truncate text-slate-500">{range}</p>}
     </div>
   );
 }
@@ -197,7 +199,7 @@ function CalendarWeek({ items, anchorDate, controls }) {
                 {days.map((day) => {
                   const key = dateKey(day);
                   const hourItems = (grouped[key] || []).filter((item) => {
-                    if (!item.start_time) return true;
+                    if (!item.start_time) return false;
                     const startMinutes = timeToMinutes(item.start_time);
                     const endMinutes = timeToMinutes(item.end_time) ?? (startMinutes === null ? null : startMinutes + 60);
                     if (startMinutes === null || endMinutes === null) return false;

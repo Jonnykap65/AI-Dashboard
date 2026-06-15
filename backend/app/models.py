@@ -21,6 +21,7 @@ class CalendarItem(TimestampMixin, Base):
 
     title: Mapped[str] = mapped_column(String(160), index=True)
     date: Mapped[str] = mapped_column(String(10), index=True)
+    end_date: Mapped[str | None] = mapped_column(String(10), nullable=True, index=True)
     start_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
     end_time: Mapped[str | None] = mapped_column(String(5), nullable=True)
     location: Mapped[str | None] = mapped_column(String(220), nullable=True)

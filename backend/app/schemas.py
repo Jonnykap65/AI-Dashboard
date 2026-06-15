@@ -79,6 +79,7 @@ class ORMBase(BaseModel):
 class CalendarBase(BaseModel):
     title: str = Field(min_length=1, max_length=160)
     date: DateString
+    end_date: DateString | None = None
     start_time: TimeString | None = None
     end_time: TimeString | None = None
     location: str | None = Field(default=None, max_length=220)
@@ -91,6 +92,7 @@ class CalendarBase(BaseModel):
     inbox_item_id: int | None = None
 
     _date = field_validator("date")(validate_date)
+    _end_date = field_validator("end_date")(validate_date)
     _start = field_validator("start_time")(validate_time)
     _end = field_validator("end_time")(validate_time)
 
@@ -102,6 +104,7 @@ class CalendarCreate(CalendarBase):
 class CalendarUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=160)
     date: DateString | None = None
+    end_date: DateString | None = None
     start_time: TimeString | None = None
     end_time: TimeString | None = None
     location: str | None = Field(default=None, max_length=220)
@@ -114,6 +117,7 @@ class CalendarUpdate(BaseModel):
     inbox_item_id: int | None = None
 
     _date = field_validator("date")(validate_date)
+    _end_date = field_validator("end_date")(validate_date)
     _start = field_validator("start_time")(validate_time)
     _end = field_validator("end_time")(validate_time)
 

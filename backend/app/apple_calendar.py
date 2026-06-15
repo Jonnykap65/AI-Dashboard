@@ -109,12 +109,21 @@ def list_apple_calendars() -> dict[str, Any]:
     return {"calendars": [{"name": cal.name, "url": str(cal.url)} for cal in calendars]}
 
 
-def as_date_and_time(value: Any) -> tuple[str, str | None]:
+def as_date_and_time(value: Any) -> tuple[str, str | None, bool]:
     if isinstance(value, datetime):
-        return value.date().isoformat(), value.strftime("%H:%M")
+        return value.date().isoformat(), value.strftime("%H:%M"), False
     if isinstance(value, date):
-        return value.isoformat(), None
-    return date.today().isoformat(), None
+        return value.isoformat(), None, True
+    return date.today().isoformat(), None, False
+
+
+def inclusive_ical_end_date(start_date: str, end_date: str, all_day: bool) -> str:
+    if not all_day:
+        return end_date
+    parsed_end = date.fromisoformat(end_date)
+    parsed_start = date.fromisoformat(start_date)
+    inclusive_end = max(parsed_start, parsed_end - timedelta(days=1))
+    return inclusive_end.isoformat()
 
 
 def clean_ical_value(value: Any) -> str | None:
@@ -132,14 +141,16 @@ def calendar_component_to_payload(component: Any, calendar_name: str) -> dict[st
 
     start_value = dtstart.dt
     end_value = component.get("dtend").dt if component.get("dtend") else None
-    event_date, start_time = as_date_and_time(start_value)
-    _, end_time = as_date_and_time(end_value) if end_value else (event_date, None)
+    event_date, start_time, start_all_day = as_date_and_time(start_value)
+    raw_end_date, end_time, end_all_day = as_date_and_time(end_value) if end_value else (event_date, None, start_all_day)
+    end_date = inclusive_ical_end_date(event_date, raw_end_date, start_all_day and end_all_day)
     external_id = f"{uid}:{event_date}:{start_time or 'all-day'}"
     last_modified = component.get("last-modified")
 
     return {
         "title": clean_ical_value(component.get("summary")) or "(No title)",
         "date": event_date,
+        "end_date": end_date,
         "start_time": start_time,
         "end_time": end_time,
         "location": clean_ical_value(component.get("location")),
