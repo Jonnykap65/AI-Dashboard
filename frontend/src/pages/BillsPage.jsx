@@ -35,6 +35,13 @@ function billAmount(item) {
   return Number(item.amount || 0);
 }
 
+function parseLocalDate(value) {
+  if (!value) return null;
+  const [year, month, day] = String(value).split('-').map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
+}
+
 function annualizedAmount(item) {
   const amount = billAmount(item);
   if (item.billing_cycle === 'weekly') return amount * 52;
@@ -44,8 +51,32 @@ function annualizedAmount(item) {
   return amount;
 }
 
+function monthlyOccurrencesPaidToDate(item, today) {
+  const dueDate = parseLocalDate(item.due_date);
+  if (!dueDate) return 0;
+  const monthsBeforeCurrent = today.getMonth();
+  const currentMonthDuePaid = today.getDate() >= dueDate.getDate() ? 1 : 0;
+  return monthsBeforeCurrent + currentMonthDuePaid;
+}
+
+function annualDuePaidToDate(item, today) {
+  const dueDate = parseLocalDate(item.due_date);
+  if (!dueDate) return false;
+  const dueMonth = dueDate.getMonth();
+  const dueDay = dueDate.getDate();
+  return dueMonth < today.getMonth() || (dueMonth === today.getMonth() && dueDay <= today.getDate());
+}
+
+function paidToDateAmount(item, today) {
+  const amount = billAmount(item);
+  if (item.billing_cycle === 'monthly') return amount * monthlyOccurrencesPaidToDate(item, today);
+  if (item.billing_cycle === 'yearly') return annualDuePaidToDate(item, today) ? amount : 0;
+  return 0;
+}
+
 function BillingChart({ bills, loading }) {
   const summary = useMemo(() => {
+    const today = new Date();
     const monthlyTotal = bills
       .filter((bill) => bill.billing_cycle === 'monthly')
       .reduce((total, bill) => total + billAmount(bill), 0);
@@ -55,9 +86,15 @@ function BillingChart({ bills, loading }) {
     const yearlyAnnualTotal = bills
       .filter((bill) => bill.billing_cycle === 'yearly')
       .reduce((total, bill) => total + annualizedAmount(bill), 0);
+    const monthlyPaidToDate = bills
+      .filter((bill) => bill.billing_cycle === 'monthly')
+      .reduce((total, bill) => total + paidToDateAmount(bill, today), 0);
+    const yearlyPaidToDate = bills
+      .filter((bill) => bill.billing_cycle === 'yearly')
+      .reduce((total, bill) => total + paidToDateAmount(bill, today), 0);
     const bars = [
-      { cycle: 'monthly', label: 'monthly annualized', value: monthlyAnnualTotal },
-      { cycle: 'yearly', label: 'yearly annual total', value: yearlyAnnualTotal }
+      { cycle: 'monthly', label: 'monthly paid to date', value: monthlyPaidToDate },
+      { cycle: 'yearly', label: 'yearly paid to date', value: yearlyPaidToDate }
     ];
     return { monthlyTotal, monthlyAnnualTotal, yearlyAnnualTotal, recordCount: bills.length, bars };
   }, [bills]);
