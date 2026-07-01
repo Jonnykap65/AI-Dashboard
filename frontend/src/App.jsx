@@ -21,6 +21,7 @@ function routeFromHash() {
   }
   if (route === '/packages') return '/projects';
   if (route === '/links') return '/notes';
+  if (route === '/systems') return '/tools';
   return route;
 }
 
@@ -56,7 +57,8 @@ export default function App() {
     if (route === '/bills') return <BillsPage />;
     if (route === '/projects') return <ProjectsPage />;
     if (route === '/notes') return <KnowledgeBasePage />;
-    if (route === '/systems') return <SystemsToolsPage />;
+    if (route === '/system') return <SystemsToolsPage mode="system" />;
+    if (route === '/tools') return <SystemsToolsPage mode="tools" />;
     if (route === '/search') return <SearchPage setRoute={setRoute} />;
     if (route === '/settings') return <SettingsPage onSaved={setSettings} />;
     const key = route.replace('/', '');

@@ -58,8 +58,8 @@ export default function KnowledgeBasePage() {
   const [linkImportResults, setLinkImportResults] = useState([]);
   const [selectedArticleId, setSelectedArticleId] = useState(null);
   const [selectedLinkId, setSelectedLinkId] = useState(null);
-  const [showLinks, setShowLinks] = useState(true);
-  const [showArticles, setShowArticles] = useState(true);
+  const [showLinks, setShowLinks] = useState(false);
+  const [showArticles, setShowArticles] = useState(false);
   const [showLinkTransfer, setShowLinkTransfer] = useState(false);
   const [showArticleTransfer, setShowArticleTransfer] = useState(false);
 

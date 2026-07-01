@@ -278,7 +278,7 @@ export default function Dashboard({ settings }) {
           </div>
           <div className="grid content-start gap-4">
             <Card title="Storage Metrics"><StorageMetrics storage={systemHealth?.storage} /></Card>
-            <Card title="Pinned KB Articles"><PinnedKnowledgeBase notes={data.notes} /></Card>
+            <Card title="Pinned Articles"><PinnedKnowledgeBase notes={data.notes} /></Card>
             <Card title="Pinned Links">
               {!data.favorite_links?.length ? <EmptyState>No pinned links yet.</EmptyState> : (
                 <div className="flex flex-wrap gap-2">

@@ -1,4 +1,4 @@
-import { BookOpen, CalendarDays, CreditCard, FolderKanban, Home, Search, Settings, Wrench } from 'lucide-react';
+import { BookOpen, CalendarDays, CreditCard, FolderKanban, Home, Monitor, Search, Settings, Wrench } from 'lucide-react';
 
 const items = [
   ['/', 'Dashboard', Home],
@@ -6,7 +6,8 @@ const items = [
   ['/bills', 'Bills', CreditCard],
   ['/projects', 'Projects', FolderKanban],
   ['/notes', 'Knowledge Base', BookOpen],
-  ['/systems', 'Systems / Tools', Wrench],
+  ['/system', 'System', Monitor],
+  ['/tools', 'Tools', Wrench],
   ['/search', 'Search', Search],
   ['/settings', 'Settings', Settings]
 ];

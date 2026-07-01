@@ -9,8 +9,8 @@ const routes = {
   link: '/notes',
   project: '/projects',
   project_task: '/projects',
-  asset: '/systems',
-  speed_test: '/systems',
+  asset: '/system',
+  speed_test: '/tools',
   daily_plan: '/'
 };
 

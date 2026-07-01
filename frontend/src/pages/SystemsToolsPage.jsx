@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { Badge, Card, EmptyState, ErrorBox, Loading } from '../components/ui.jsx';
 import { api } from '../lib/api.js';
 
-const sections = ['Speed Test', 'Ping Test', 'DNS Lookup', 'Port Check', 'Local System Info', 'Local system apps'];
+const toolSections = ['Speed Test', 'Ping Test', 'DNS Lookup', 'Port Check'];
+const systemSections = ['Local System Info', 'Local System Apps'];
 
-function ToolsNav({ active, setActive }) {
+function ToolsNav({ active, setActive, sections }) {
   return (
     <div className="flex flex-wrap gap-2">
       {sections.map((section) => (
@@ -373,7 +374,7 @@ function LocalSystemApps() {
     <div className="grid gap-4">
       <ErrorBox message={error} />
       <Card
-        title="Local system apps"
+        title="Local System Apps"
         action={<button className="btn" onClick={load}>Refresh</button>}
       >
         {!payload ? <Loading /> : (
@@ -437,21 +438,31 @@ function ToolForm({ title, error, onSubmit, button, children }) {
   );
 }
 
-export default function SystemsToolsPage() {
-  const [active, setActive] = useState('Speed Test');
+export default function SystemsToolsPage({ mode = 'tools' }) {
+  const sections = mode === 'system' ? systemSections : toolSections;
+  const [active, setActive] = useState(sections[0]);
+
+  useEffect(() => {
+    if (!sections.includes(active)) setActive(sections[0]);
+  }, [active, sections]);
+
+  const isSystem = mode === 'system';
+
   return (
     <div className="grid gap-4">
       <div>
-        <h1 className="text-2xl font-bold">Systems / Tools</h1>
-        <p className="text-sm text-slate-500">Small local IT utilities and asset tracking.</p>
+        <h1 className="text-2xl font-bold">{isSystem ? 'System' : 'Tools'}</h1>
+        <p className="text-sm text-slate-500">
+          {isSystem ? 'Read-only local system inventory and machine status.' : 'Small local IT utilities for network and connectivity checks.'}
+        </p>
       </div>
-      <ToolsNav active={active} setActive={setActive} />
+      <ToolsNav active={active} setActive={setActive} sections={sections} />
       {active === 'Speed Test' && <SpeedTest />}
       {active === 'Ping Test' && <PingTest />}
       {active === 'DNS Lookup' && <DnsLookup />}
       {active === 'Port Check' && <PortCheck />}
       {active === 'Local System Info' && <LocalSystemInfo />}
-      {active === 'Local system apps' && <LocalSystemApps />}
+      {active === 'Local System Apps' && <LocalSystemApps />}
     </div>
   );
 }

@@ -142,6 +142,20 @@ export default function ProjectsPage() {
     await action(`/api/projects/${project.id}/archive`);
   }
 
+  async function deleteProject(project) {
+    if (!window.confirm(`Delete "${project.name}"? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/api/projects/${project.id}`);
+      if (editing?.id === project.id) {
+        setForm(null);
+        setEditing(null);
+      }
+      await load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   async function updateNext(project) {
     const next = window.prompt('Next action', project.next_action || project.next_step || '');
     if (!next) return;
@@ -233,6 +247,7 @@ export default function ProjectsPage() {
                     <button className="btn" onClick={() => action(`/api/projects/${project.id}/mark-worked`)}>Worked today</button>
                     <button className="btn" onClick={() => { setEditing(project); setForm({ ...project }); }}>Edit</button>
                     {project.status !== 'archived' && <button className="btn btn-danger" onClick={() => archive(project)}>Archive</button>}
+                    <button className="btn btn-danger" onClick={() => deleteProject(project)}>Delete</button>
                   </div>
                 </div>
                 <dl className="mt-3 grid gap-2 text-sm md:grid-cols-2">
