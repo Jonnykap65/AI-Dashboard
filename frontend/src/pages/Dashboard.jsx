@@ -81,6 +81,10 @@ function PinnedKnowledgeBase({ notes }) {
   );
 }
 
+function projectTypeLabel(value) {
+  return String(value || 'general').replaceAll('_', ' ');
+}
+
 function ProjectList({ projects, tasksByProject, subtitleField }) {
   if (!projects?.length) return <EmptyState>Nothing here right now.</EmptyState>;
   return (
@@ -94,7 +98,10 @@ function ProjectList({ projects, tasksByProject, subtitleField }) {
                 <p className="truncate font-medium">{project.name}</p>
                 <p className="text-xs text-slate-500">{project[subtitleField] || project.next_action || project.last_worked_at || project.status || ''}</p>
               </div>
-              {project.priority && <Badge tone={project.priority}>{project.priority}</Badge>}
+              <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                <Badge tone="muted">{projectTypeLabel(project.category)}</Badge>
+                {project.priority && <Badge tone={project.priority}>{project.priority}</Badge>}
+              </div>
             </div>
             {projectTasks.length > 0 && (
               <div className="mt-3 grid gap-2">
@@ -130,13 +137,11 @@ function ProjectMomentum({ momentum, tasks }) {
     return map;
   }, [tasks]);
 
-  const activeProjects = momentum?.next_actions?.length ? momentum.next_actions : momentum?.active;
-
   return (
     <div className="grid gap-3 md:grid-cols-2">
       <div>
         <p className="mb-2 text-sm font-semibold">Active projects</p>
-        <ProjectList projects={activeProjects} tasksByProject={tasksByProject} subtitleField="next_action" />
+        <ProjectList projects={momentum?.active} tasksByProject={tasksByProject} subtitleField="next_action" />
       </div>
       <div>
         <p className="mb-2 text-sm font-semibold">Inactive projects</p>

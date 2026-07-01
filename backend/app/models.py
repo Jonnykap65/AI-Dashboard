@@ -162,7 +162,7 @@ class Project(TimestampMixin, Base):
     __tablename__ = "projects"
 
     name: Mapped[str] = mapped_column(String(160), index=True)
-    category: Mapped[str] = mapped_column(String(40), default="codex", index=True)
+    category: Mapped[str] = mapped_column(String(40), default="general", index=True)
     status: Mapped[str] = mapped_column(String(40), default="active")
     priority: Mapped[str] = mapped_column(String(12), default="medium")
     goal: Mapped[str | None] = mapped_column(Text, nullable=True)

@@ -1403,14 +1403,8 @@ def dashboard(db: Session = Depends(get_db)):
         .order_by(models.SecurityRecord.expiration_date)
         .limit(6)
     ).all()
-    stale_cutoff = (today - timedelta(days=7)).isoformat()
     active_projects = [p for p in projects if schemas.normalize_project_status(p.status) == "active"]
-    current_projects = [p for p in active_projects if p.last_worked_at and p.last_worked_at >= stale_cutoff]
-    inactive_projects = [
-        p for p in projects
-        if schemas.normalize_project_status(p.status) == "inactive"
-        or (schemas.normalize_project_status(p.status) == "active" and (not p.last_worked_at or p.last_worked_at < stale_cutoff))
-    ]
+    inactive_projects = [p for p in projects if schemas.normalize_project_status(p.status) == "inactive"]
 
     bill_total = sum(b.amount for b in bills if b.billing_cycle == "monthly")
     return {
@@ -1436,9 +1430,9 @@ def dashboard(db: Session = Depends(get_db)):
         "chores": serialize(chores[:10], schemas.ChoreOut),
         "projects": [project_display(p) for p in projects[:8]],
         "project_momentum": {
-            "active": [project_display(p) for p in current_projects[:8]],
+            "active": [project_display(p) for p in active_projects[:8]],
             "inactive": [project_display(p) for p in inactive_projects[:8]],
-            "next_actions": [project_display(p) for p in current_projects if (p.next_action or p.next_step)][:8],
+            "next_actions": [project_display(p) for p in active_projects if (p.next_action or p.next_step)][:8],
         },
         "project_tasks": serialize(project_tasks[:8], schemas.ProjectTaskOut),
         "notes": serialize(notes[:6], schemas.NoteOut),

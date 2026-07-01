@@ -133,7 +133,7 @@ export const entityConfig = {
     ],
     fields: [
       { name: 'name', label: 'Project name', type: 'text', required: true },
-      { name: 'category', label: 'Category', type: 'select', options: ['codex', 'personal', 'work', 'home', 'learning', 'other'] },
+      { name: 'category', label: 'Project type', type: 'select', options: ['general', 'codex', 'software', 'work', 'home', 'learning', 'maintenance', 'event', 'finance', 'health', 'creative', 'other'] },
       { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'completed', 'archived'] },
       { name: 'priority', label: 'Priority', type: 'select', options: ['low', 'medium', 'high'] },
       { name: 'due_date', label: 'Target date', type: 'date' },
@@ -148,7 +148,7 @@ export const entityConfig = {
       { name: 'tags', label: 'Tags', type: 'text' },
       { name: 'notes', label: 'Notes', type: 'textarea' }
     ],
-    empty: { name: '', category: 'codex', status: 'active', priority: 'medium', due_date: '', local_path: '', repo_url: '', next_action: '', goal: '', blocker: '', frontend_command: '', backend_command: '', codex_prompt: '', tags: '', notes: '' }
+    empty: { name: '', category: 'general', status: 'active', priority: 'medium', due_date: '', local_path: '', repo_url: '', next_action: '', goal: '', blocker: '', frontend_command: '', backend_command: '', codex_prompt: '', tags: '', notes: '' }
   },
   projectTasks: {
     label: 'Project Tasks',

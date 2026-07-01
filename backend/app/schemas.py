@@ -8,7 +8,21 @@ TimeString = str
 Priority = Literal["low", "medium", "high"]
 InboxType = Literal["reminder", "note", "project task", "calendar item", "link", "idea"]
 InboxStatus = Literal["new", "processed", "archived"]
-ProjectCategory = Literal["codex", "personal", "work", "home", "learning", "other"]
+ProjectCategory = Literal[
+    "general",
+    "codex",
+    "software",
+    "personal",
+    "work",
+    "home",
+    "learning",
+    "maintenance",
+    "event",
+    "finance",
+    "health",
+    "creative",
+    "other",
+]
 ProjectStatus = Literal["active", "inactive", "completed", "archived"]
 NoteType = Literal["note", "runbook", "troubleshooting", "script", "codex_prompt", "decision", "reference", "how_to", "other"]
 LinkEnvironment = Literal["local", "personal", "work", "public", "other"]
@@ -463,7 +477,7 @@ class QuickLinkOut(QuickLinkBase, ORMBase):
 
 class ProjectBase(BaseModel):
     name: str = Field(min_length=1, max_length=160)
-    category: ProjectCategory = "codex"
+    category: ProjectCategory = "general"
     status: ProjectStatus = "active"
     priority: Priority = "medium"
     goal: str | None = None

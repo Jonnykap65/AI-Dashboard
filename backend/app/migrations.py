@@ -40,7 +40,7 @@ LINK_COLUMNS = {
 }
 
 PROJECT_COLUMNS = {
-    "category": "VARCHAR(40) DEFAULT 'codex'",
+    "category": "VARCHAR(40) DEFAULT 'general'",
     "goal": "TEXT",
     "next_action": "VARCHAR(300)",
     "blocker": "TEXT",
@@ -110,7 +110,7 @@ def ensure_schema(engine: Engine):
             for name, ddl in PROJECT_COLUMNS.items():
                 if name not in existing:
                     conn.execute(text(f"ALTER TABLE projects ADD COLUMN {name} {ddl}"))
-            conn.execute(text("UPDATE projects SET category = 'codex' WHERE category IS NULL OR category = ''"))
+            conn.execute(text("UPDATE projects SET category = 'general' WHERE category IS NULL OR category = ''"))
             conn.execute(text("UPDATE projects SET local_path = codex_workspace_path WHERE (local_path IS NULL OR local_path = '') AND codex_workspace_path IS NOT NULL"))
             conn.execute(text("UPDATE projects SET repo_url = repository_url WHERE (repo_url IS NULL OR repo_url = '') AND repository_url IS NOT NULL"))
             conn.execute(text("UPDATE projects SET next_action = next_step WHERE (next_action IS NULL OR next_action = '') AND next_step IS NOT NULL"))
