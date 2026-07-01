@@ -216,16 +216,6 @@ export default function Dashboard({ settings }) {
     };
   }, []);
 
-  const groupedLinks = useMemo(() => {
-    const groups = {};
-    for (const link of data?.links || []) {
-      const category = link.category || 'General';
-      groups[category] = groups[category] || [];
-      groups[category].push(link);
-    }
-    return groups;
-  }, [data]);
-
   const upcomingCalendarEvents = useMemo(() => {
     return (data?.next_7_days || [])
       .filter((item) => item.source !== 'reminder')
@@ -289,31 +279,16 @@ export default function Dashboard({ settings }) {
           <div className="grid content-start gap-4">
             <Card title="Storage Metrics"><StorageMetrics storage={systemHealth?.storage} /></Card>
             <Card title="Pinned KB Articles"><PinnedKnowledgeBase notes={data.notes} /></Card>
-            <Card title="Quick Links">
-              {data.favorite_links?.length > 0 && (
-                <div className="mb-3">
-                  <p className="mb-2 text-sm font-semibold">Favorites</p>
-                  <div className="flex flex-wrap gap-2">
-                    {data.favorite_links.map((link) => <a key={link.id} className="btn" href={link.url} target="_blank" rel="noreferrer">{link.local_network ? 'Local Network · ' : ''}{link.name}</a>)}
-                  </div>
+            <Card title="Pinned Links">
+              {!data.favorite_links?.length ? <EmptyState>No pinned links yet.</EmptyState> : (
+                <div className="flex flex-wrap gap-2">
+                  {data.favorite_links.map((link) => (
+                    <a key={link.id} className="btn" href={link.url} target="_blank" rel="noreferrer">
+                      {link.local_network ? 'Local Network · ' : ''}{link.name}
+                    </a>
+                  ))}
                 </div>
               )}
-              {data.recent_links?.length > 0 && (
-                <div className="mb-3">
-                  <p className="mb-2 text-sm font-semibold">Recently used</p>
-                  <div className="flex flex-wrap gap-2">
-                    {data.recent_links.map((link) => <a key={link.id} className="btn" href={link.url} target="_blank" rel="noreferrer">{link.name}</a>)}
-                  </div>
-                </div>
-              )}
-              {Object.keys(groupedLinks).length === 0 ? <EmptyState>No quick links yet.</EmptyState> : Object.entries(groupedLinks).map(([category, links]) => (
-                <div key={category} className="mb-3">
-                  <p className="mb-2 text-sm font-semibold">{category}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {links.map((link) => <a key={link.id} className="btn" href={link.url} target="_blank" rel="noreferrer">{link.local_network ? 'Local Network · ' : ''}{link.name}</a>)}
-                  </div>
-                </div>
-              ))}
             </Card>
           </div>
         </div>
