@@ -58,6 +58,8 @@ export default function KnowledgeBasePage() {
   const [linkImportResults, setLinkImportResults] = useState([]);
   const [selectedArticleId, setSelectedArticleId] = useState(null);
   const [selectedLinkId, setSelectedLinkId] = useState(null);
+  const [showLinks, setShowLinks] = useState(true);
+  const [showArticles, setShowArticles] = useState(true);
   const [showLinkTransfer, setShowLinkTransfer] = useState(false);
   const [showArticleTransfer, setShowArticleTransfer] = useState(false);
 
@@ -115,16 +117,6 @@ export default function KnowledgeBasePage() {
       return matchesQuery && matchesCategory;
     });
   }, [linkCategory, linkQuery, links]);
-
-  const selectedArticle = useMemo(
-    () => articles.find((item) => item.id === selectedArticleId) || null,
-    [articles, selectedArticleId]
-  );
-
-  const selectedLink = useMemo(
-    () => links.find((item) => item.id === selectedLinkId) || null,
-    [links, selectedLinkId]
-  );
 
   function startNew(templateName) {
     const template = templates[templateName];
@@ -303,44 +295,23 @@ export default function KnowledgeBasePage() {
           <EntityForm fields={linkConfig.fields} value={linkForm} onChange={setLinkForm} onSubmit={saveLink} onCancel={() => { setLinkForm(null); setEditingLink(null); }} submitLabel={editingLink ? 'Save changes' : 'Create'} />
         </Card>
       )}
-      <Card title="Links" action={<div className="flex flex-wrap gap-2">
-        <input className="input max-w-56" placeholder="Search links" value={linkQuery} onChange={(event) => setLinkQuery(event.target.value)} />
-        <select className="input max-w-48" value={linkCategory} onChange={(event) => setLinkCategory(event.target.value)}>
-          <option value="">All link categories</option>
-          {linkCategoryOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-        </select>
+      <Card title="Links" action={<div className="flex flex-wrap items-center gap-2">
+        {showLinks && (
+          <>
+            <input className="input max-w-56" placeholder="Search links" value={linkQuery} onChange={(event) => setLinkQuery(event.target.value)} />
+            <select className="input max-w-48" value={linkCategory} onChange={(event) => setLinkCategory(event.target.value)}>
+              <option value="">All link categories</option>
+              {linkCategoryOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </>
+        )}
+        <button className="btn" type="button" onClick={() => setShowLinks((value) => !value)} aria-expanded={showLinks}>
+          <ChevronDown className={`h-4 w-4 transition ${showLinks ? 'rotate-180' : ''}`} />
+          {showLinks ? 'Collapse' : 'Expand'}
+        </button>
       </div>}>
-        {loading ? <Loading /> : visibleLinks.length === 0 ? <EmptyState>No links match these filters.</EmptyState> : (
+        {!showLinks ? <EmptyState>Links collapsed.</EmptyState> : loading ? <Loading /> : visibleLinks.length === 0 ? <EmptyState>No links match these filters.</EmptyState> : (
           <div className="grid gap-3">
-            {selectedLink && (
-              <section className="rounded-md border border-pine/40 bg-emerald-50/60 p-4 dark:border-emerald-700 dark:bg-emerald-950/30">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="break-words text-lg font-semibold">{selectedLink.name}</h3>
-                      <Badge>{selectedLink.category || 'uncategorized'}</Badge>
-                      {selectedLink.favorite && <Badge tone="low">favorite</Badge>}
-                      {selectedLink.local_network && <Badge tone="muted">local network</Badge>}
-                    </div>
-                    <p className="mt-1 text-xs text-slate-500">{selectedLink.tags || 'No tags'} · {selectedLink.updated_at}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button className="btn" onClick={() => openLink(selectedLink)}>Open</button>
-                    <button className="btn" onClick={() => navigator.clipboard?.writeText(selectedLink.url)}>Copy URL</button>
-                    <button className="btn" onClick={() => { setEditingLink(selectedLink); setLinkForm({ ...selectedLink }); }}><Icons.Pencil className="h-4 w-4" /></button>
-                    <button className="btn" onClick={() => setSelectedLinkId(null)}><Icons.X className="h-4 w-4" /></button>
-                  </div>
-                </div>
-                <div className="mt-4 rounded-md border border-line bg-white p-3 dark:border-slate-800 dark:bg-slate-950">
-                  <p className="label">Link</p>
-                  <p className="mt-1 break-all font-mono text-sm text-slate-800 dark:text-slate-100">{selectedLink.url}</p>
-                </div>
-                <div className="mt-3 max-h-[20rem] overflow-auto rounded-md border border-slate-800 bg-slate-950 p-3 text-sm leading-6 text-slate-100">
-                  <p className="mb-2 text-xs font-semibold uppercase text-slate-400">Body</p>
-                  <pre className="whitespace-pre-wrap font-sans">{selectedLink.notes || 'No notes.'}</pre>
-                </div>
-              </section>
-            )}
             {visibleLinks.map((link) => (
               <article key={link.id} className={`rounded-md border p-3 transition ${selectedLinkId === link.id ? 'border-pine bg-emerald-50/40 dark:border-emerald-700 dark:bg-emerald-950/20' : 'border-line hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-900/70'}`}>
                 <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
@@ -361,47 +332,56 @@ export default function KnowledgeBasePage() {
                     <button className="btn btn-danger" onClick={() => removeLink(link)}><Icons.Trash2 className="h-4 w-4" /></button>
                   </div>
                 </div>
+                {selectedLinkId === link.id && (
+                  <section className="mt-3 rounded-md border border-pine/40 bg-emerald-50/60 p-4 dark:border-emerald-700 dark:bg-emerald-950/30">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="break-words text-lg font-semibold">{link.name}</h3>
+                          <Badge>{link.category || 'uncategorized'}</Badge>
+                          {link.favorite && <Badge tone="low">favorite</Badge>}
+                          {link.local_network && <Badge tone="muted">local network</Badge>}
+                        </div>
+                        <p className="mt-1 text-xs text-slate-500">{link.tags || 'No tags'} · {link.updated_at}</p>
+                      </div>
+                      <button className="btn" onClick={() => setSelectedLinkId(null)}><Icons.X className="h-4 w-4" /></button>
+                    </div>
+                    <div className="mt-4 rounded-md border border-line bg-white p-3 dark:border-slate-800 dark:bg-slate-950">
+                      <p className="label">Link</p>
+                      <p className="mt-1 break-all font-mono text-sm text-slate-800 dark:text-slate-100">{link.url}</p>
+                    </div>
+                    <div className="mt-3 max-h-[20rem] overflow-auto rounded-md border border-slate-800 bg-slate-950 p-3 text-sm leading-6 text-slate-100">
+                      <p className="mb-2 text-xs font-semibold uppercase text-slate-400">Body</p>
+                      <pre className="whitespace-pre-wrap font-sans">{link.notes || 'No notes.'}</pre>
+                    </div>
+                  </section>
+                )}
               </article>
             ))}
           </div>
         )}
       </Card>
-      <Card title="Articles" action={<div className="flex flex-wrap gap-2">
-        <input className="input max-w-56" placeholder="Search Article" value={query} onChange={(event) => setQuery(event.target.value)} />
-        <select className="input max-w-48" value={category} onChange={(event) => setCategory(event.target.value)}>
-          <option value="">All categories</option>
-          {config.fields.find((field) => field.name === 'note_type').options.map((option) => <option key={option} value={option}>{option}</option>)}
-        </select>
-        <select className="input max-w-48" value={tag} onChange={(event) => setTag(event.target.value)}>
-          <option value="">All tags</option>
-          {tagOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-        </select>
+      <Card title="Articles" action={<div className="flex flex-wrap items-center gap-2">
+        {showArticles && (
+          <>
+            <input className="input max-w-56" placeholder="Search Article" value={query} onChange={(event) => setQuery(event.target.value)} />
+            <select className="input max-w-48" value={category} onChange={(event) => setCategory(event.target.value)}>
+              <option value="">All categories</option>
+              {config.fields.find((field) => field.name === 'note_type').options.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+            <select className="input max-w-48" value={tag} onChange={(event) => setTag(event.target.value)}>
+              <option value="">All tags</option>
+              {tagOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </>
+        )}
+        <button className="btn" type="button" onClick={() => setShowArticles((value) => !value)} aria-expanded={showArticles}>
+          <ChevronDown className={`h-4 w-4 transition ${showArticles ? 'rotate-180' : ''}`} />
+          {showArticles ? 'Collapse' : 'Expand'}
+        </button>
       </div>}>
-        {loading ? <Loading /> : visible.length === 0 ? <EmptyState>No KB articles match these filters.</EmptyState> : (
+        {!showArticles ? <EmptyState>Articles collapsed.</EmptyState> : loading ? <Loading /> : visible.length === 0 ? <EmptyState>No KB articles match these filters.</EmptyState> : (
           <div className="grid gap-3">
-            {selectedArticle && (
-              <section className="rounded-md border border-pine/40 bg-emerald-50/60 p-4 dark:border-emerald-700 dark:bg-emerald-950/30">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="break-words text-lg font-semibold">{selectedArticle.title}</h3>
-                      <Badge>{selectedArticle.note_type}</Badge>
-                      {selectedArticle.pinned && <Badge tone="low">pinned</Badge>}
-                    </div>
-                    <p className="mt-1 text-xs text-slate-500">{selectedArticle.tags || 'No tags'} · {selectedArticle.updated_at}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button className="btn" onClick={() => navigator.clipboard?.writeText(selectedArticle.body || '')}>Copy body</button>
-                    {codeBlocks(selectedArticle.body)[0] && <button className="btn" onClick={() => navigator.clipboard?.writeText(codeBlocks(selectedArticle.body)[0])}>Copy code</button>}
-                    <button className="btn" onClick={() => { setEditingArticle(selectedArticle); setArticleForm({ ...selectedArticle }); }}><Icons.Pencil className="h-4 w-4" /></button>
-                    <button className="btn" onClick={() => setSelectedArticleId(null)}><Icons.X className="h-4 w-4" /></button>
-                  </div>
-                </div>
-                <div className="mt-4 max-h-[28rem] overflow-auto rounded-md border border-line bg-white p-3 text-sm leading-6 text-slate-800 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100">
-                  <pre className="whitespace-pre-wrap font-sans">{selectedArticle.body || 'No body.'}</pre>
-                </div>
-              </section>
-            )}
             {visible.map((item) => {
               const blocks = codeBlocks(item.body);
               return (
@@ -423,6 +403,24 @@ export default function KnowledgeBasePage() {
                       <button className="btn btn-danger" onClick={() => removeArticle(item)}><Icons.Trash2 className="h-4 w-4" /></button>
                     </div>
                   </div>
+                  {selectedArticleId === item.id && (
+                    <section className="mt-3 rounded-md border border-pine/40 bg-emerald-50/60 p-4 dark:border-emerald-700 dark:bg-emerald-950/30">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="break-words text-lg font-semibold">{item.title}</h3>
+                            <Badge>{item.note_type}</Badge>
+                            {item.pinned && <Badge tone="low">pinned</Badge>}
+                          </div>
+                          <p className="mt-1 text-xs text-slate-500">{item.tags || 'No tags'} · {item.updated_at}</p>
+                        </div>
+                        <button className="btn" onClick={() => setSelectedArticleId(null)}><Icons.X className="h-4 w-4" /></button>
+                      </div>
+                      <div className="mt-4 max-h-[28rem] overflow-auto rounded-md border border-line bg-white p-3 text-sm leading-6 text-slate-800 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100">
+                        <pre className="whitespace-pre-wrap font-sans">{item.body || 'No body.'}</pre>
+                      </div>
+                    </section>
+                  )}
                 </article>
               );
             })}
