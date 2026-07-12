@@ -7,6 +7,15 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>AIHomeDashboardInstaller</AssemblyName>
+    <Product>AI Home Dashboard</Product>
+    <Title>AI Home Dashboard Setup</Title>
+    <AssemblyTitle>AI Home Dashboard Setup</AssemblyTitle>
+    <FileDescription>AI Home Dashboard Setup</FileDescription>
+    <Description>Setup wizard for AI Home Dashboard</Description>
+    <Company>AI Home Dashboard</Company>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <ApplicationIcon>..\AIHomeDashboard.Desktop\Assets\AIHomeDashboard.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>

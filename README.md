@@ -86,6 +86,8 @@ Run `dist\AIHomeDashboardInstaller.exe` to choose:
 - A custom install folder.
 - Start Menu and desktop shortcut creation.
 
+The installer uses a conventional Windows setup wizard with welcome, options, progress, and completion screens. The generated executable is currently unsigned. On another computer, Windows SmartScreen or User Account Control may therefore display an **Unknown publisher** warning; verify that the file came from this repository before choosing **More info** and **Run anyway**. Code-sign the executable with a trusted certificate before distributing it broadly if you want Windows to show a verified publisher.
+
 After installing, run the packaged app from the shortcut or directly from the selected install folder:
 
 ```powershell
