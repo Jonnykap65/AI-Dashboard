@@ -88,6 +88,18 @@ def delete_synced_calendar_reminders(db: Session, source: str, external_ids: set
     return len(reminders)
 
 
+def clear_synced_calendar_entries(db: Session) -> dict[str, int]:
+    sources = ["google", "apple"]
+    items = db.scalars(select(CalendarItem).where(CalendarItem.source.in_(sources))).all()
+    reminders = db.scalars(select(Reminder).where(Reminder.source.in_(sources))).all()
+    for item in items:
+        db.delete(item)
+    for reminder in reminders:
+        db.delete(reminder)
+    db.commit()
+    return {"calendar_items_removed": len(items), "reminders_removed": len(reminders)}
+
+
 def backfill_calendar_reminders(db: Session) -> dict[str, int]:
     created = 0
     updated = 0

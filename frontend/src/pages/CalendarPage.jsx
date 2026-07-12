@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarSync, ChevronDown, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { CalendarSync, ChevronDown, ChevronLeft, ChevronRight, RefreshCw, Trash2 } from 'lucide-react';
 import { Badge, Card, ErrorBox, Loading } from '../components/ui.jsx';
 import { api } from '../lib/api.js';
 
@@ -302,6 +302,19 @@ export default function CalendarPage() {
     }
   }
 
+  async function clearSyncedEntries() {
+    if (!window.confirm('Remove all locally synced Google and Apple calendar entries from this dashboard? Your provider calendars and manual dashboard entries will not be changed.')) return;
+    setError('');
+    setMessage('');
+    try {
+      const result = await api.post('/api/calendar/synced/clear', {});
+      setMessage(`Cleared ${result.calendar_items_removed} synced calendar entr${result.calendar_items_removed === 1 ? 'y' : 'ies'} and ${result.reminders_removed} generated reminder${result.reminders_removed === 1 ? '' : 's'} from this dashboard. Google and Apple calendars were not changed.`);
+      await refreshCalendarViews();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   const calendarControls = (
     <CalendarControls
       mode={viewMode}
@@ -413,6 +426,13 @@ export default function CalendarPage() {
                 <p className="text-sm text-slate-500">
                   Uses iCloud CalDAV with an Apple app-specific password. Save credentials in <code>backend\config\apple-calendar.json</code>. Leave calendar name blank to sync all visible calendars.
                 </p>
+              </section>
+              <section className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+                <div>
+                  <p className="text-sm font-semibold">Clear synced entries</p>
+                  <p className="mt-1 text-xs text-slate-500">Removes only local Google and Apple copies from this dashboard. Provider calendars and manual entries are not changed; syncing again restores the copies.</p>
+                </div>
+                <button className="btn btn-danger" type="button" onClick={clearSyncedEntries}><Trash2 className="h-4 w-4" /> Clear synced entries</button>
               </section>
               {message && <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{message}</p>}
               <ErrorBox message={error} />

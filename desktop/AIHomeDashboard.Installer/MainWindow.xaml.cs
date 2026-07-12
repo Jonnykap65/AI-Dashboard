@@ -59,6 +59,24 @@ public partial class MainWindow : Window
         }
     }
 
+    private void Next_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPage(OptionsPage);
+        StepText.Text = "Step 2 of 2";
+        BackButton.Visibility = Visibility.Visible;
+        NextButton.Visibility = Visibility.Collapsed;
+        InstallButton.Visibility = Visibility.Visible;
+    }
+
+    private void Back_Click(object sender, RoutedEventArgs e)
+    {
+        ShowPage(WelcomePage);
+        StepText.Text = "Step 1 of 2";
+        BackButton.Visibility = Visibility.Collapsed;
+        InstallButton.Visibility = Visibility.Collapsed;
+        NextButton.Visibility = Visibility.Visible;
+    }
+
     private async void Install_Click(object sender, RoutedEventArgs e)
     {
         InstallButton.IsEnabled = false;
@@ -75,7 +93,13 @@ public partial class MainWindow : Window
                 throw new InvalidOperationException("All-users install requires running this installer as Administrator.");
             }
 
-            StatusText.Text = "Installing...";
+            ShowPage(ProgressPage);
+            StepText.Text = "Installing";
+            BackButton.Visibility = Visibility.Collapsed;
+            InstallButton.Visibility = Visibility.Collapsed;
+            CancelButton.IsEnabled = false;
+            InstallProgressBar.IsIndeterminate = true;
+            ProgressStatusText.Text = "Copying application files...";
             await Task.Run(() => InstallTo(installPath));
 
             if (StartMenuShortcutCheckBox.IsChecked == true)
@@ -88,27 +112,49 @@ public partial class MainWindow : Window
                 CreateDesktopShortcut(installPath);
             }
 
-            StatusText.Text = $"Installed to {installPath}";
-
-            if (LaunchAfterInstallCheckBox.IsChecked == true)
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = Path.Combine(installPath, ExeName),
-                    WorkingDirectory = installPath,
-                    UseShellExecute = true
-                });
-            }
-
-            System.Windows.MessageBox.Show(this, "AI Home Dashboard was installed successfully.", AppDisplayName, MessageBoxButton.OK, MessageBoxImage.Information);
-            Close();
+            InstallProgressBar.IsIndeterminate = false;
+            InstallProgressBar.Value = 100;
+            InstalledLocationText.Text = $"Installed to {installPath}";
+            ShowPage(FinishPage);
+            StepText.Text = "Complete";
+            CancelButton.Visibility = Visibility.Collapsed;
+            FinishButton.Visibility = Visibility.Visible;
         }
         catch (Exception ex)
         {
-            StatusText.Text = ex.Message;
             System.Windows.MessageBox.Show(this, ex.Message, AppDisplayName, MessageBoxButton.OK, MessageBoxImage.Error);
             InstallButton.IsEnabled = true;
+            CancelButton.IsEnabled = true;
+            ShowPage(OptionsPage);
+            StepText.Text = "Step 2 of 2";
+            BackButton.Visibility = Visibility.Visible;
+            InstallButton.Visibility = Visibility.Visible;
         }
+    }
+
+    private void Finish_Click(object sender, RoutedEventArgs e)
+    {
+        if (LaunchAfterInstallCheckBox.IsChecked == true)
+        {
+            var installPath = InstallPathTextBox.Text.Trim();
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = Path.Combine(installPath, ExeName),
+                WorkingDirectory = installPath,
+                UseShellExecute = true
+            });
+        }
+
+        Close();
+    }
+
+    private void ShowPage(UIElement page)
+    {
+        WelcomePage.Visibility = Visibility.Collapsed;
+        OptionsPage.Visibility = Visibility.Collapsed;
+        ProgressPage.Visibility = Visibility.Collapsed;
+        FinishPage.Visibility = Visibility.Collapsed;
+        page.Visibility = Visibility.Visible;
     }
 
     private static void InstallTo(string installPath)
