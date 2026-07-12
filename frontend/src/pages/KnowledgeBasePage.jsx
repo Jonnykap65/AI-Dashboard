@@ -427,7 +427,8 @@ export default function KnowledgeBasePage() {
           </div>
         )}
       </Card>
-      <Card title="Link import/export">
+      <Card title="Import / Export">
+        <div className="grid gap-3">
         <div className="rounded-md border border-line dark:border-slate-800">
           <button
             className="flex w-full items-center justify-between gap-3 p-3 text-left"
@@ -492,8 +493,6 @@ export default function KnowledgeBasePage() {
             </div>
           )}
         </div>
-      </Card>
-      <Card title="Article import/export">
         <div className="rounded-md border border-line dark:border-slate-800">
           <button
             className="flex w-full items-center justify-between gap-3 p-3 text-left"
@@ -545,6 +544,7 @@ export default function KnowledgeBasePage() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </Card>
     </div>

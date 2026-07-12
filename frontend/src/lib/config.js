@@ -134,7 +134,7 @@ export const entityConfig = {
     fields: [
       { name: 'name', label: 'Project name', type: 'text', required: true },
       { name: 'category', label: 'Project type', type: 'select', options: ['general', 'codex', 'software', 'work', 'home', 'learning', 'maintenance', 'event', 'finance', 'health', 'creative', 'other'] },
-      { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive', 'completed', 'archived'] },
+      { name: 'status', label: 'Status', type: 'select', options: ['active', 'in_progress', 'completed', 'archived'] },
       { name: 'priority', label: 'Priority', type: 'select', options: ['low', 'medium', 'high'] },
       { name: 'due_date', label: 'Target date', type: 'date' },
       { name: 'local_path', label: 'Local path', type: 'text' },

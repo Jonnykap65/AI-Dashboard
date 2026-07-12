@@ -6,7 +6,7 @@ Local-first AI Home Dashboard with a FastAPI backend and Vite frontend. Developm
 
 ## Last Session Summary
 
-Added a Calendar Sync action that clears only locally cached Google/Apple entries and generated reminders, without modifying provider calendars or manual dashboard data.
+Rebuilt and smoke-tested the Windows installer after consolidating and validating the pending dashboard, project, calendar, settings, navigation, and layout changes for publication on `main`.
 
 ## Pending Tasks
 
@@ -17,6 +17,16 @@ None recorded.
 Keep the API loopback-bound; local credentials and application data must not be committed.
 
 ## Recent Session Notes
+
+### 2026-07-12 - Refresh installer with consolidated app changes
+
+- Goal: Update the Windows installer with all currently documented AI-Dashboard changes, then publish the source on the consolidated `main` branch.
+- Changes made: Rebuilt the frontend, packaged backend helper, desktop launcher, embedded installer payload, and final setup executable; verified the pending source set contains no embedded secrets.
+- Files modified: Existing pending backend/frontend source changes, `dist/AIHomeDashboardInstaller.exe`, `PROJECT_HANDOFF.md`.
+- Commands/tests run: `git diff --check`, sensitive-pattern scan, full `scripts/Build-WindowsExe.ps1` pipeline, executable metadata/hash inspection, installer launch/responsiveness smoke test.
+- Result: `dist/AIHomeDashboardInstaller.exe` is refreshed, 50.56 MB, opens as AI Home Dashboard Setup, and is responsive.
+- Risks/incomplete work: The installer remains unsigned and `dist/` remains intentionally excluded from Git; rebuild locally for distribution.
+- Next step: None.
 
 ### 2026-07-12 - Clear locally synced calendar entries
 

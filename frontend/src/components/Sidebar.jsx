@@ -6,9 +6,9 @@ const items = [
   ['/bills', 'Bills', CreditCard],
   ['/projects', 'Projects', FolderKanban],
   ['/notes', 'Knowledge Base', BookOpen],
-  ['/system', 'System', Monitor],
-  ['/tools', 'Tools', Wrench],
   ['/search', 'Search', Search],
+  ['/tools', 'Tools', Wrench],
+  ['/system', 'System', Monitor],
   ['/settings', 'Settings', Settings]
 ];
 

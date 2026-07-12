@@ -35,35 +35,31 @@ export default function SettingsPage({ onSaved }) {
     return () => mediaQuery.removeEventListener?.('change', handleChange);
   }, []);
 
-  async function save(event) {
-    event.preventDefault();
+  async function savePreferences(nextSettings) {
     setError('');
     try {
-      const saved = await api.put('/api/settings', settings);
+      const saved = await api.put('/api/settings', nextSettings);
       setSettings(saved);
       onSaved?.(saved);
-      setMessage('Settings saved.');
+      setMessage('Preferences saved automatically.');
     } catch (err) {
       setError(err.message);
     }
   }
 
-  async function saveAppearance() {
-    setError('');
-    try {
-      const saved = await api.put('/api/settings', settings);
-      setSettings(saved);
-      onSaved?.(saved);
-      setMessage('Appearance saved.');
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  function selectTheme(theme) {
+  async function selectTheme(theme) {
     const nextSettings = { ...settings, theme };
     setSettings(nextSettings);
     onSaved?.(nextSettings);
+    setError('');
+    try {
+      const saved = await api.put('/api/settings', nextSettings);
+      setSettings(saved);
+      onSaved?.(saved);
+      setMessage('Appearance saved automatically.');
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   async function importJson() {
@@ -163,20 +159,28 @@ export default function SettingsPage({ onSaved }) {
       <ErrorBox message={error} />
       {message && <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{message}</p>}
       <Card title="Preferences">
-        <form onSubmit={save} className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           <label className="grid gap-1">
             <span className="label">Display name</span>
-            <input className="input" value={settings.display_name} onChange={(e) => setSettings({ ...settings, display_name: e.target.value })} />
+            <input
+              className="input"
+              value={settings.display_name}
+              onChange={(e) => setSettings({ ...settings, display_name: e.target.value })}
+              onBlur={() => savePreferences(settings)}
+            />
           </label>
           <label className="grid gap-1">
             <span className="label">Time format</span>
-            <select className="input" value={settings.time_format} onChange={(e) => setSettings({ ...settings, time_format: e.target.value })}>
+            <select className="input" value={settings.time_format} onChange={(e) => {
+              const nextSettings = { ...settings, time_format: e.target.value };
+              setSettings(nextSettings);
+              savePreferences(nextSettings);
+            }}>
               <option value="12h">12-hour</option>
               <option value="24h">24-hour</option>
             </select>
           </label>
-          <button className="btn btn-primary md:col-span-2">Save settings</button>
-        </form>
+        </div>
       </Card>
       <Card title="Appearance">
         <div className="grid gap-3 md:grid-cols-2">
@@ -199,10 +203,6 @@ export default function SettingsPage({ onSaved }) {
               </button>
             );
           })}
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <button className="btn btn-primary" type="button" onClick={saveAppearance}>Save appearance</button>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Theme changes preview immediately and are saved locally.</p>
         </div>
       </Card>
       <Card title="Google APIs">

@@ -562,6 +562,23 @@ def reminder_to_agenda_item(reminder: models.Reminder) -> dict[str, Any]:
     }
 
 
+def project_to_agenda_item(project: models.Project) -> dict[str, Any]:
+    return {
+        "id": f"project-{project.id}",
+        "record_id": project.id,
+        "title": project.name,
+        "date": project.due_date,
+        "start_time": None,
+        "end_time": None,
+        "location": None,
+        "notes": project.goal or project.description,
+        "category": "Project target",
+        "source": "project",
+        "priority": project.priority,
+        "status": schemas.normalize_project_status(project.status),
+    }
+
+
 def calendar_to_agenda_item(item: models.CalendarItem) -> dict[str, Any]:
     payload = schemas.CalendarOut.model_validate(item).model_dump()
     payload["record_id"] = item.id
@@ -635,10 +652,20 @@ def combined_agenda(db: Session, start_date: date, end_date: date) -> list[dict[
         )
         .order_by(models.Reminder.due_date, models.Reminder.due_time)
     ).all()
+    projects = db.scalars(
+        select(models.Project)
+        .where(
+            models.Project.due_date.is_not(None),
+            models.Project.due_date.between(start, end),
+            models.Project.status.not_in(["archived", "completed", "shipped"]),
+        )
+        .order_by(models.Project.due_date, models.Project.name)
+    ).all()
     items = []
     for item in calendar_items:
         items.extend(calendar_to_agenda_items(item, start_date, end_date))
     items.extend(reminder_to_agenda_item(reminder) for reminder in reminders)
+    items.extend(project_to_agenda_item(project) for project in projects)
     return sorted(items, key=lambda item: (item["date"] or "9999-99-99", item["start_time"] or "99:99", item["title"]))
 
 
@@ -1321,7 +1348,7 @@ def start_day(db: Session = Depends(get_db)):
         "plan": schemas.DailyPlanOut.model_validate(plan),
         "calendar": [calendar_to_agenda_item(i) for i in db.scalars(select(models.CalendarItem).where(models.CalendarItem.date == today).order_by(models.CalendarItem.start_time)).all()],
         "due_reminders": serialize(db.scalars(select(models.Reminder).where(models.Reminder.status == "open", models.Reminder.due_date <= today).order_by(models.Reminder.due_date)).all(), schemas.ReminderOut),
-        "project_actions": [project_display(p) for p in db.scalars(select(models.Project).where(models.Project.status.in_(["active", "inactive", "planned", "blocked"])).order_by(models.Project.updated_at.desc()).limit(10)).all()],
+        "project_actions": [project_display(p) for p in db.scalars(select(models.Project).where(models.Project.status.in_(["active", "in_progress", "inactive", "planned", "blocked"])).order_by(models.Project.updated_at.desc()).limit(10)).all()],
         "inbox": serialize(db.scalars(select(models.InboxItem).where(models.InboxItem.status == "new").order_by(models.InboxItem.created_at).limit(10)).all(), schemas.InboxOut),
     }
 
@@ -1404,7 +1431,8 @@ def dashboard(db: Session = Depends(get_db)):
         .limit(6)
     ).all()
     active_projects = [p for p in projects if schemas.normalize_project_status(p.status) == "active"]
-    inactive_projects = [p for p in projects if schemas.normalize_project_status(p.status) == "inactive"]
+    in_progress_projects = [p for p in projects if schemas.normalize_project_status(p.status) == "in_progress"]
+    completed_projects = [p for p in projects if schemas.normalize_project_status(p.status) == "completed"]
 
     bill_total = sum(b.amount for b in bills if b.billing_cycle == "monthly")
     return {
@@ -1431,7 +1459,8 @@ def dashboard(db: Session = Depends(get_db)):
         "projects": [project_display(p) for p in projects[:8]],
         "project_momentum": {
             "active": [project_display(p) for p in active_projects[:8]],
-            "inactive": [project_display(p) for p in inactive_projects[:8]],
+            "in_progress": [project_display(p) for p in in_progress_projects[:8]],
+            "completed": [project_display(p) for p in completed_projects[:8]],
             "next_actions": [project_display(p) for p in active_projects if (p.next_action or p.next_step)][:8],
         },
         "project_tasks": serialize(project_tasks[:8], schemas.ProjectTaskOut),

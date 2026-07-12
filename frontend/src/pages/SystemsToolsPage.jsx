@@ -120,6 +120,11 @@ function formatDuration(seconds = 0) {
   return `${minutes}m`;
 }
 
+function formatSystemTimestamp(value) {
+  if (!value) return 'Not available';
+  return String(value).replace('T', ' ');
+}
+
 function UsageBar({ value, tone = 'bg-pine' }) {
   const percent = Math.min(Math.max(Number(value || 0), 0), 100);
   return (
@@ -144,14 +149,24 @@ function LocalSystemInfoView({ info }) {
   const drives = info.storage?.drives || [];
   return (
     <div className="grid gap-4">
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <InfoTile label="Host" value={info.hostname} detail={info.checked_at ? `Checked ${info.checked_at}` : null} />
-        <InfoTile label="OS" value={info.os} detail={info.os_version || info.platform} />
-        <InfoTile label="Uptime" value={formatDuration(info.uptime_seconds)} detail={info.boot_time ? `Booted ${info.boot_time}` : null} />
-        <InfoTile label="Processor" value={`${info.cpu?.logical_count ?? 'N/A'} logical CPUs`} detail={info.cpu?.processor || `${info.cpu?.physical_count ?? 'N/A'} physical cores`} />
+      <div className="system-panel flex flex-wrap items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">This device</p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <h2 className="text-xl font-semibold">{info.hostname || 'Unknown host'}</h2>
+            <Badge tone="low">Online</Badge>
+          </div>
+          <p className="mt-1 text-sm text-slate-500">{info.os || 'Unknown OS'} · {info.os_version || info.platform || 'Version unavailable'}</p>
+        </div>
+        <div className="text-left sm:text-right">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Last refreshed</p>
+          <p className="mt-1 text-sm font-medium tabular-nums">{formatSystemTimestamp(info.checked_at)}</p>
+        </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <InfoTile label="Uptime" value={formatDuration(info.uptime_seconds)} detail={info.boot_time ? `Booted ${info.boot_time}` : null} />
+        <InfoTile label="Processor" value={`${info.cpu?.logical_count ?? 'N/A'} logical CPUs`} detail={info.cpu?.processor || `${info.cpu?.physical_count ?? 'N/A'} physical cores`} />
         <div className="metric-panel">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -218,12 +233,13 @@ function LocalSystemInfoView({ info }) {
             </table>
           </div>
         )}
-      </div>
-
-      <div className="system-panel text-sm">
-        <p className="font-semibold">Dashboard Data</p>
-        <p className="mt-1 break-all text-slate-500">{info.storage?.app_data?.path}</p>
-        <p className="mt-1 text-xs text-slate-500">{info.storage?.app_data?.size_mb ?? 0} MB currently used</p>
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-3 border-t border-line pt-3 text-sm dark:border-slate-800">
+          <div className="min-w-0">
+            <p className="font-semibold">Dashboard data</p>
+            <p className="mt-1 break-all text-xs text-slate-500">{info.storage?.app_data?.path}</p>
+          </div>
+          <Badge tone="muted">{info.storage?.app_data?.size_mb ?? 0} MB used</Badge>
+        </div>
       </div>
     </div>
   );

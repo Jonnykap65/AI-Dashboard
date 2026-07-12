@@ -50,6 +50,7 @@ function sourceTone(source) {
   if (source === 'google') return 'low';
   if (source === 'apple') return 'medium';
   if (source === 'reminder') return 'high';
+  if (source === 'project') return 'medium';
   return 'muted';
 }
 
@@ -99,8 +100,8 @@ function CalendarControls({ mode, setMode, onPrev, onNext, onToday, periodLabel 
 
 function EventChip({ item }) {
   const range = item.spans_multiple_days && item.start_date && item.end_date ? `${item.start_date} to ${item.end_date}` : '';
-  return (
-    <div className="overflow-hidden rounded-md border border-line bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-950">
+  const content = (
+    <>
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
         <span className="min-w-0 truncate font-semibold">{item.title}</span>
         <span className="shrink-0">
@@ -111,7 +112,17 @@ function EventChip({ item }) {
         {item.start_time || 'All day'}{item.end_time ? `-${item.end_time}` : ''}{item.location ? ` · ${item.location}` : ''}
       </p>
       {range && <p className="mt-1 truncate text-slate-500">{range}</p>}
-    </div>
+    </>
+  );
+  if (item.source === 'project') {
+    return (
+      <a href={`#/projects?project=${item.record_id}`} className="block overflow-hidden rounded-md border border-amber-400/60 bg-amber-50 p-2 text-xs transition hover:border-amber-500 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:hover:bg-amber-950/70" title="Open project">
+        {content}
+      </a>
+    );
+  }
+  return (
+    <div className="overflow-hidden rounded-md border border-line bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-950">{content}</div>
   );
 }
 
@@ -228,7 +239,11 @@ export default function CalendarPage() {
   const [status, setStatus] = useState(null);
   const [appleStatus, setAppleStatus] = useState(null);
   const [items, setItems] = useState([]);
-  const [monthDate, setMonthDate] = useState(new Date());
+  const requestedDate = new URLSearchParams(window.location.hash.split('?')[1] || '').get('date');
+  const initialDate = requestedDate && /^\d{4}-\d{2}-\d{2}$/.test(requestedDate)
+    ? new Date(`${requestedDate}T12:00:00`)
+    : new Date();
+  const [monthDate, setMonthDate] = useState(initialDate);
   const [viewMode, setViewMode] = useState('month');
   const [loadingCalendar, setLoadingCalendar] = useState(true);
   const [calendarId, setCalendarId] = useState('primary');

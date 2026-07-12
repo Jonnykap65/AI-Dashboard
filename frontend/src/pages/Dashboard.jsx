@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { GripVertical } from 'lucide-react';
 import { api } from '../lib/api.js';
 import { Badge, Card, EmptyState, ErrorBox, Loading } from '../components/ui.jsx';
 
@@ -85,24 +86,64 @@ function projectTypeLabel(value) {
   return String(value || 'general').replaceAll('_', ' ');
 }
 
-function ProjectList({ projects, tasksByProject, subtitleField }) {
-  if (!projects?.length) return <EmptyState>Nothing here right now.</EmptyState>;
+function ProjectColumn({ projects, tasksByProject, status, label, draggingId, dragTarget, onDragStart, onDragEnd, onDragOver, onDrop, onStatusChange }) {
   return (
-    <div className="grid gap-2">
-      {projects.map((project) => {
+    <section
+      data-project-status={status}
+      className={`flex min-h-64 flex-col rounded-lg border p-3 transition ${dragTarget === status ? 'border-pine bg-emerald-50/70 ring-2 ring-pine/20 dark:bg-emerald-950/20' : 'border-line bg-slate-50/60 dark:border-slate-800 dark:bg-slate-950/40'}`}
+      onDragEnter={(event) => onDragOver(event, status)}
+      onDragOver={(event) => onDragOver(event, status)}
+      onDrop={(event) => onDrop(event, status)}
+    >
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h3 className="font-semibold">{label}</h3>
+        <Badge tone={status === 'completed' ? 'low' : status === 'in_progress' ? 'medium' : 'muted'}>{projects?.length || 0}</Badge>
+      </div>
+      {!projects?.length ? (
+        <div className="flex min-h-48 flex-1 items-center justify-center rounded-md border border-dashed border-line p-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+          Drop a project here.
+        </div>
+      ) : <div className="grid flex-1 content-start gap-2">
+        {projects.map((project) => {
         const projectTasks = tasksByProject.get((project.name || '').toLowerCase()) || [];
         return (
-          <article key={project.id} className="rounded-md border border-line p-3 dark:border-slate-800">
+          <article
+            key={project.id}
+            draggable
+            onDragStart={(event) => onDragStart(event, project)}
+            onDragEnd={onDragEnd}
+            className={`cursor-grab rounded-md border border-line bg-white p-3 shadow-sm transition active:cursor-grabbing dark:border-slate-700 dark:bg-slate-900 ${draggingId === project.id ? 'scale-[0.98] opacity-40' : 'hover:border-pine hover:shadow'}`}
+          >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate font-medium">{project.name}</p>
-                <p className="text-xs text-slate-500">{project[subtitleField] || project.next_action || project.last_worked_at || project.status || ''}</p>
+                <a draggable="false" className="truncate font-medium hover:text-pine hover:underline" href={`#/projects?project=${project.id}`}>{project.name}</a>
               </div>
-              <div className="flex shrink-0 flex-wrap justify-end gap-2">
-                <Badge tone="muted">{projectTypeLabel(project.category)}</Badge>
-                {project.priority && <Badge tone={project.priority}>{project.priority}</Badge>}
+              <div className="flex shrink-0 items-center gap-2">
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Badge tone="muted">{projectTypeLabel(project.category)}</Badge>
+                  {project.priority && <Badge tone={project.priority}>{project.priority}</Badge>}
+                </div>
+                <span
+                  className="rounded p-1 text-slate-400"
+                  title={`Drag ${project.name} to another status`}
+                  aria-hidden="true"
+                >
+                  <GripVertical className="h-5 w-5" />
+                </span>
               </div>
             </div>
+            <label className="mt-3 flex items-center justify-between gap-2 border-t border-line pt-2 text-xs text-slate-500 dark:border-slate-800">
+              <span>Move to</span>
+              <select
+                className="rounded border border-line bg-transparent px-2 py-1 text-xs font-medium text-ink dark:border-slate-700 dark:text-slate-100"
+                value={project.status}
+                onChange={(event) => onStatusChange(project.id, event.target.value)}
+              >
+                <option value="active">Active</option>
+                <option value="in_progress">In progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </label>
             {projectTasks.length > 0 && (
               <div className="mt-3 grid gap-2">
                 {projectTasks.slice(0, 3).map((task) => (
@@ -120,11 +161,14 @@ function ProjectList({ projects, tasksByProject, subtitleField }) {
           </article>
         );
       })}
-    </div>
+      </div>}
+    </section>
   );
 }
 
-function ProjectMomentum({ momentum, tasks }) {
+function ProjectStatusDashboard({ momentum, tasks, onStatusChange }) {
+  const [draggingId, setDraggingId] = useState(null);
+  const [dragTarget, setDragTarget] = useState(null);
   const tasksByProject = useMemo(() => {
     const map = new Map();
     for (const task of tasks || []) {
@@ -137,16 +181,50 @@ function ProjectMomentum({ momentum, tasks }) {
     return map;
   }, [tasks]);
 
+  function handleDragStart(event, project) {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/project-id', String(project.id));
+    event.dataTransfer.setData('text/plain', String(project.id));
+    setDraggingId(project.id);
+  }
+
+  function handleDragOver(event, status) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    setDragTarget(status);
+  }
+
+  async function handleDrop(event, status) {
+    event.preventDefault();
+    const projectId = Number(event.dataTransfer.getData('text/project-id') || event.dataTransfer.getData('text/plain'));
+    setDragTarget(null);
+    setDraggingId(null);
+    if (projectId) await onStatusChange(projectId, status);
+  }
+
+  const columns = [
+    { status: 'active', label: 'Active' },
+    { status: 'in_progress', label: 'In progress' },
+    { status: 'completed', label: 'Completed' }
+  ];
+
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      <div>
-        <p className="mb-2 text-sm font-semibold">Active projects</p>
-        <ProjectList projects={momentum?.active} tasksByProject={tasksByProject} subtitleField="next_action" />
-      </div>
-      <div>
-        <p className="mb-2 text-sm font-semibold">Inactive projects</p>
-        <ProjectList projects={momentum?.inactive} tasksByProject={tasksByProject} subtitleField="last_worked_at" />
-      </div>
+    <div className="grid gap-3 lg:grid-cols-3">
+      {columns.map((column) => (
+        <ProjectColumn
+          key={column.status}
+          {...column}
+          projects={momentum?.[column.status] || []}
+          tasksByProject={tasksByProject}
+          draggingId={draggingId}
+          dragTarget={dragTarget}
+          onDragStart={handleDragStart}
+          onDragEnd={() => { setDraggingId(null); setDragTarget(null); }}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onStatusChange={onStatusChange}
+        />
+      ))}
     </div>
   );
 }
@@ -183,11 +261,27 @@ function StorageMetrics({ storage }) {
   );
 }
 
+function DashboardPanel({ title, subtitle, children, className = '' }) {
+  return (
+    <section className={`rounded-lg border border-line bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-950/40 ${className}`}>
+      <div className="mb-3">
+        <h3 className="font-semibold">{title}</h3>
+        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export default function Dashboard({ settings }) {
   const [data, setData] = useState(null);
   const [systemHealth, setSystemHealth] = useState(null);
   const [time, setTime] = useState(new Date());
   const [error, setError] = useState('');
+
+  async function loadDashboard() {
+    setData(await api.get('/api/dashboard'));
+  }
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -195,8 +289,35 @@ export default function Dashboard({ settings }) {
   }, []);
 
   useEffect(() => {
-    api.get('/api/dashboard').then(setData).catch((err) => setError(err.message));
+    loadDashboard().catch((err) => setError(err.message));
   }, []);
+
+  async function updateProjectStatus(projectId, status) {
+    setError('');
+    const previousData = data;
+    const statuses = ['active', 'in_progress', 'completed'];
+    const project = statuses.flatMap((key) => data?.project_momentum?.[key] || []).find((item) => item.id === projectId);
+    if (!project || project.status === status) return;
+    setData((current) => ({
+      ...current,
+      project_momentum: {
+        ...current.project_momentum,
+        ...Object.fromEntries(statuses.map((key) => [
+          key,
+          key === status
+            ? [...(current.project_momentum[key] || []).filter((item) => item.id !== projectId), { ...project, status }]
+            : (current.project_momentum[key] || []).filter((item) => item.id !== projectId)
+        ]))
+      }
+    }));
+    try {
+      await api.put(`/api/projects/${projectId}`, { status });
+      await loadDashboard();
+    } catch (err) {
+      setData(previousData);
+      setError(err.message);
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -236,59 +357,62 @@ export default function Dashboard({ settings }) {
       </header>
       <ErrorBox message={error} />
       {!data ? <Loading /> : (
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="grid gap-4 lg:col-span-2">
-            <Card title="System Health">
-              {!systemHealth ? <Loading /> : (
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="flex items-center justify-between gap-3 md:col-span-2">
-                    <span className="text-sm text-slate-500">{systemHealth.host}</span>
+        <div className="grid gap-4">
+          <Card title="Project Status Dashboard">
+            <ProjectStatusDashboard momentum={data.project_momentum} tasks={data.project_tasks} onStatusChange={updateProjectStatus} />
+          </Card>
+          <Card title="System Overview">
+            {!systemHealth ? <Loading /> : (
+              <div className="grid gap-4 lg:grid-cols-3">
+                <DashboardPanel title="System Health" subtitle={systemHealth.host} className="lg:col-span-2">
+                  <div className="mb-3 flex justify-end">
                     <Badge tone={systemHealth.status === 'healthy' ? 'low' : systemHealth.status === 'watch' ? 'medium' : 'high'}>{systemHealth.status}</Badge>
                   </div>
-                  <div className="metric-panel">
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span>CPU</span>
-                      <span className="font-semibold tabular-nums">{systemHealth.cpu_percent}%</span>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="metric-panel">
+                      <div className="mb-1 flex justify-between text-sm"><span>CPU</span><span className="font-semibold tabular-nums">{systemHealth.cpu_percent}%</span></div>
+                      <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800"><div className="h-2 rounded-full bg-pine" style={{ width: `${Math.min(systemHealth.cpu_percent, 100)}%` }} /></div>
                     </div>
-                    <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
-                      <div className="h-2 rounded-full bg-pine" style={{ width: `${Math.min(systemHealth.cpu_percent, 100)}%` }} />
+                    <div className="metric-panel">
+                      <div className="mb-1 flex justify-between text-sm"><span>Memory</span><span className="font-semibold tabular-nums">{systemHealth.memory_percent}%</span></div>
+                      <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800"><div className="h-2 rounded-full bg-gold" style={{ width: `${Math.min(systemHealth.memory_percent, 100)}%` }} /></div>
+                      <p className="mt-2 text-xs text-slate-500">{systemHealth.memory_used_gb} GB of {systemHealth.memory_total_gb} GB · {systemHealth.processor_count} logical CPUs</p>
                     </div>
                   </div>
-                  <div className="metric-panel">
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span>Memory</span>
-                      <span className="font-semibold tabular-nums">{systemHealth.memory_percent}%</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
-                      <div className="h-2 rounded-full bg-gold" style={{ width: `${Math.min(systemHealth.memory_percent, 100)}%` }} />
-                    </div>
-                    <p className="mt-2 text-xs text-slate-500">{systemHealth.memory_used_gb} GB of {systemHealth.memory_total_gb} GB · {systemHealth.processor_count} logical CPUs</p>
-                  </div>
-                </div>
-              )}
-            </Card>
-            <Card title="Project Momentum"><ProjectMomentum momentum={data.project_momentum} tasks={data.project_tasks} /></Card>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card title="Upcoming Calendar Events"><PaginatedList items={upcomingCalendarEvents} dateField="event_date" /></Card>
-              <Card title="Upcoming Bills">
+                </DashboardPanel>
+                <DashboardPanel title="Storage" subtitle="Local drive capacity">
+                  <StorageMetrics storage={systemHealth.storage} />
+                </DashboardPanel>
+              </div>
+            )}
+          </Card>
+          <div className="grid items-start gap-4 lg:grid-cols-3">
+            <Card title="Upcoming" className="lg:col-span-2">
+              <div className="grid gap-4 md:grid-cols-2">
+                <DashboardPanel title="Calendar Events" subtitle="Next 7 days">
+                  <PaginatedList items={upcomingCalendarEvents} dateField="event_date" />
+                </DashboardPanel>
+                <DashboardPanel title="Bills" subtitle="Due soon">
                 <p className="mb-3 text-sm text-slate-500">Monthly total: <span className="font-semibold text-ink dark:text-slate-100">${data.bills.monthly_total.toFixed(2)}</span></p>
                 <PaginatedList items={data.bills.next_7} titleField="name" dateField="due_date" />
-              </Card>
-            </div>
-          </div>
-          <div className="grid content-start gap-4">
-            <Card title="Storage Metrics"><StorageMetrics storage={systemHealth?.storage} /></Card>
-            <Card title="Pinned Articles"><PinnedKnowledgeBase notes={data.notes} /></Card>
-            <Card title="Pinned Links">
-              {!data.favorite_links?.length ? <EmptyState>No pinned links yet.</EmptyState> : (
-                <div className="flex flex-wrap gap-2">
-                  {data.favorite_links.map((link) => (
-                    <a key={link.id} className="btn" href={link.url} target="_blank" rel="noreferrer">
-                      {link.local_network ? 'Local Network · ' : ''}{link.name}
-                    </a>
-                  ))}
-                </div>
-              )}
+                </DashboardPanel>
+              </div>
+            </Card>
+            <Card title="Pinned Resources">
+              <div className="grid gap-4">
+                <DashboardPanel title="Articles"><PinnedKnowledgeBase notes={data.notes} /></DashboardPanel>
+                <DashboardPanel title="Links">
+                  {!data.favorite_links?.length ? <EmptyState>No pinned links yet.</EmptyState> : (
+                    <div className="flex flex-wrap gap-2">
+                      {data.favorite_links.map((link) => (
+                        <a key={link.id} className="btn" href={link.url} target="_blank" rel="noreferrer">
+                          {link.local_network ? 'Local Network · ' : ''}{link.name}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </DashboardPanel>
+              </div>
             </Card>
           </div>
         </div>

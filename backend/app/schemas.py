@@ -23,7 +23,7 @@ ProjectCategory = Literal[
     "creative",
     "other",
 ]
-ProjectStatus = Literal["active", "inactive", "completed", "archived"]
+ProjectStatus = Literal["active", "in_progress", "completed", "archived"]
 NoteType = Literal["note", "runbook", "troubleshooting", "script", "codex_prompt", "decision", "reference", "how_to", "other"]
 LinkEnvironment = Literal["local", "personal", "work", "public", "other"]
 AssetType = Literal["workstation", "laptop", "server", "router", "storage", "cloud_service", "application", "mobile_device", "other"]
@@ -49,8 +49,9 @@ def normalize_project_status(value: str | None) -> str | None:
     if value is None:
         return value
     legacy = {
-        "planned": "inactive",
-        "blocked": "inactive",
+        "planned": "in_progress",
+        "blocked": "in_progress",
+        "inactive": "in_progress",
         "shipped": "completed",
     }
     return legacy.get(value, value)

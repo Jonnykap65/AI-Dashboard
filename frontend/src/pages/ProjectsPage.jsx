@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import EntityForm from '../components/EntityForm.jsx';
 import { Badge, Card, EmptyState, ErrorBox, Loading } from '../components/ui.jsx';
 import { api } from '../lib/api.js';
@@ -56,12 +57,13 @@ function copyText(value) {
 }
 
 function normalizedProjectStatus(project) {
-  if (project.status === 'planned' || project.status === 'blocked') return 'inactive';
+  if (project.status === 'planned' || project.status === 'blocked' || project.status === 'inactive') return 'in_progress';
   if (project.status === 'shipped') return 'completed';
   return project.status || 'active';
 }
 
 export default function ProjectsPage() {
+  const requestedProjectId = Number(new URLSearchParams(window.location.hash.split('?')[1] || '').get('project')) || null;
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [form, setForm] = useState(null);
@@ -69,7 +71,8 @@ export default function ProjectsPage() {
   const [taskForm, setTaskForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('active');
+  const [filter, setFilter] = useState(requestedProjectId ? 'all' : 'active');
+  const [expandedProjects, setExpandedProjects] = useState(() => new Set());
 
   const projectFields = useMemo(() => {
     const category = form?.category || entityConfig.projects.empty.category;
@@ -92,6 +95,12 @@ export default function ProjectsPage() {
   }
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    if (!loading && requestedProjectId) {
+      document.getElementById(`project-${requestedProjectId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [loading, requestedProjectId]);
 
   const visibleProjects = useMemo(() => {
     if (filter === 'all') return projects;
@@ -156,12 +165,6 @@ export default function ProjectsPage() {
     }
   }
 
-  async function updateNext(project) {
-    const next = window.prompt('Next action', project.next_action || project.next_step || '');
-    if (!next) return;
-    await action(`/api/projects/${project.id}/next-action`, { next_action: next });
-  }
-
   function startProject(templateName = 'General') {
     const template = projectTemplates[templateName] || projectTemplates.General;
     setEditing(null);
@@ -190,6 +193,15 @@ export default function ProjectsPage() {
     );
   }
 
+  function toggleProject(projectId) {
+    setExpandedProjects((current) => {
+      const next = new Set(current);
+      if (next.has(projectId)) next.delete(projectId);
+      else next.add(projectId);
+      return next;
+    });
+  }
+
   return (
     <div className="grid gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -199,7 +211,7 @@ export default function ProjectsPage() {
         </div>
         <div className="flex gap-2">
           <select className="input max-w-36" value={filter} onChange={(event) => setFilter(event.target.value)}>
-            {['active', 'inactive', 'completed', 'archived', 'all'].map((item) => <option key={item} value={item}>{item}</option>)}
+            {['active', 'in_progress', 'completed', 'archived', 'all'].map((item) => <option key={item} value={item}>{item.replaceAll('_', ' ')}</option>)}
           </select>
           <button className="btn btn-primary" onClick={() => startProject()}>Add project</button>
         </div>
@@ -227,15 +239,15 @@ export default function ProjectsPage() {
         {loading ? <Loading /> : visibleProjects.length === 0 ? <EmptyState>No projects in this view.</EmptyState> : (
           <div className="grid gap-3">
             {visibleProjects.map((project) => (
-              <article key={project.id} className="rounded-md border border-line p-3 dark:border-slate-800">
+              <article id={`project-${project.id}`} key={project.id} className={`rounded-md border p-3 ${requestedProjectId === project.id ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-line dark:border-slate-800'}`}>
                 {(() => {
                   const projectTasks = tasksByProject[(project.name || '').trim().toLowerCase()] || [];
+                  const isExpanded = expandedProjects.has(project.id);
                   return (
                     <>
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
                     <h2 className="font-semibold">{project.name}</h2>
-                    <p className="mt-1 text-sm text-slate-500">{project.goal || project.description || 'No goal set.'}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <Badge>{projectTypeLabel(project.category)}</Badge>
                       <Badge tone={project.priority}>{project.priority}</Badge>
@@ -243,17 +255,17 @@ export default function ProjectsPage() {
                       {project.last_worked_at && <Badge tone="muted">worked {project.last_worked_at}</Badge>}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button className="btn" onClick={() => action(`/api/projects/${project.id}/mark-worked`)}>Worked today</button>
-                    <button className="btn" onClick={() => { setEditing(project); setForm({ ...project }); }}>Edit</button>
-                    {project.status !== 'archived' && <button className="btn btn-danger" onClick={() => archive(project)}>Archive</button>}
-                    <button className="btn btn-danger" onClick={() => deleteProject(project)}>Delete</button>
-                  </div>
+                  <button className="btn shrink-0" type="button" onClick={() => toggleProject(project.id)} aria-expanded={isExpanded} aria-controls={`project-details-${project.id}`}>
+                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    {isExpanded ? 'Collapse' : 'Expand'}
+                  </button>
                 </div>
+                {isExpanded && <div id={`project-details-${project.id}`}>
+                <p className="mt-3 text-sm text-slate-500">{project.goal || project.description || 'No goal set.'}</p>
                 <dl className="mt-3 grid gap-2 text-sm md:grid-cols-2">
                   <div><dt className="label">Next action</dt><dd>{project.next_action || project.next_step || 'None'}</dd></div>
                   <div><dt className="label">Blocker</dt><dd>{project.blocker || 'None'}</dd></div>
-                  {project.due_date && <div><dt className="label">Target date</dt><dd>{project.due_date}</dd></div>}
+                  {project.due_date && <div><dt className="label">Target date</dt><dd><a className="font-medium text-pine underline-offset-2 hover:underline dark:text-emerald-300" href={`#/calendar?date=${project.due_date}`}>{project.due_date}</a></dd></div>}
                   {project.tags && <div><dt className="label">Tags</dt><dd>{project.tags}</dd></div>}
                   {hasTechnicalDetails(project) && (
                     <>
@@ -263,12 +275,17 @@ export default function ProjectsPage() {
                   )}
                 </dl>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button className="btn" onClick={() => updateNext(project)}>Update next action</button>
                   <button className="btn" onClick={() => setTaskForm({ ...entityConfig.projectTasks.empty, project_name: project.name })}>Add task</button>
                   {project.frontend_command && <button className="btn" onClick={() => copyText(project.frontend_command)}>Copy frontend command</button>}
                   {project.backend_command && <button className="btn" onClick={() => copyText(project.backend_command)}>Copy backend command</button>}
                   {project.codex_prompt && <button className="btn" onClick={() => copyText(project.codex_prompt)}>Copy Codex prompt</button>}
                   {(project.repo_url || project.repository_url) && <a className="btn" href={project.repo_url || project.repository_url} target="_blank" rel="noreferrer">Open repo</a>}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3 dark:border-slate-800">
+                  <button className="btn" onClick={() => action(`/api/projects/${project.id}/mark-worked`)}>Worked today</button>
+                  <button className="btn" onClick={() => { setEditing(project); setForm({ ...project }); }}>Edit</button>
+                  {project.status !== 'archived' && <button className="btn btn-danger" onClick={() => archive(project)}>Archive</button>}
+                  <button className="btn btn-danger" onClick={() => deleteProject(project)}>Delete</button>
                 </div>
                 <div className="mt-4 border-t border-line pt-3 dark:border-slate-800">
                   <div className="mb-2 flex items-center justify-between gap-3">
@@ -292,6 +309,7 @@ export default function ProjectsPage() {
                     </div>
                   )}
                 </div>
+                </div>}
                     </>
                   );
                 })()}

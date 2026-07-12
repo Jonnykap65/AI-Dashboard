@@ -14,7 +14,8 @@ import { entityConfig } from './lib/config.js';
 import { isDarkTheme, resolveTheme } from './lib/themes.js';
 
 function routeFromHash() {
-  const route = window.location.hash.replace('#', '') || '/';
+  const hashRoute = window.location.hash.replace('#', '') || '/';
+  const route = hashRoute.split('?')[0];
   if (route === '/chores' || route === '/security') {
     window.history.replaceState(null, '', '#/');
     return '/';
