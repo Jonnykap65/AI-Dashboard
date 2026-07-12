@@ -6,7 +6,7 @@ Local-first AI Home Dashboard with a FastAPI backend and Vite frontend. Developm
 
 ## Last Session Summary
 
-Reworked the Windows installer wrapper into a conventional setup wizard, retained install scope/location/shortcut choices and update data preservation, added executable metadata, and rebuilt the packaged installer.
+Added a Calendar Sync action that clears only locally cached Google/Apple entries and generated reminders, without modifying provider calendars or manual dashboard data.
 
 ## Pending Tasks
 
@@ -17,6 +17,16 @@ None recorded.
 Keep the API loopback-bound; local credentials and application data must not be committed.
 
 ## Recent Session Notes
+
+### 2026-07-12 - Clear locally synced calendar entries
+
+- Goal: Allow clearing synced entries from the dashboard calendar without deleting provider events.
+- Changes made: Added a source-restricted backend clear helper/endpoint and a confirmed Calendar Sync action with explicit safety copy.
+- Files modified: `backend/app/calendar_reminders.py`, `backend/app/main.py`, `frontend/src/pages/CalendarPage.jsx`, `PROJECT_HANDOFF.md`.
+- Commands/tests run: Python compile check, isolated in-memory deletion test, frontend production build, `git diff --check`, backend restart/health/OpenAPI check, live control and safety-copy check.
+- Result: Only local Google/Apple calendar rows and generated reminders are removed; manual rows remain and provider APIs are not called.
+- Risks/incomplete work: A later sync intentionally restores provider copies. The live clear action was not triggered against user data.
+- Next step: None.
 
 ### 2026-07-12 - Presentable Windows setup wizard
 

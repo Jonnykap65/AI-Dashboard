@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 
 from . import models, schemas
 from .apple_calendar import apple_calendar_config, apple_calendar_status, list_apple_calendars, save_apple_calendar_config, sync_apple_calendar
-from .calendar_reminders import auto_complete_past_calendar_reminders, backfill_calendar_reminders
+from .calendar_reminders import auto_complete_past_calendar_reminders, backfill_calendar_reminders, clear_synced_calendar_entries
 from .database import Base, DATA_DIR, engine, get_db
 from .gmail_bills import connect_gmail, gmail_status, scan_gmail_for_bills
 from .google_calendar import connect_google_calendar, google_calendar_status, sync_google_calendar
@@ -1459,6 +1459,11 @@ def agenda(days_back: int = Query(31, ge=0, le=365), days_forward: int = Query(9
 @app.post("/api/calendar/reminders/backfill")
 def calendar_reminders_backfill(db: Session = Depends(get_db)):
     return backfill_calendar_reminders(db)
+
+
+@app.post("/api/calendar/synced/clear")
+def calendar_synced_clear(db: Session = Depends(get_db)):
+    return clear_synced_calendar_entries(db)
 
 
 @app.get("/api/integrations/google-calendar/status")
