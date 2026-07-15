@@ -24,9 +24,9 @@ Keep the API loopback-bound; local credentials and application data must not be 
 - Changes made: Rebuilt the Vite frontend, PyInstaller backend, WPF desktop payload, and final installer; audited the source, staged payload, and `dist` output; verified metadata, signature state, hash, window title, responsiveness, and cleanup.
 - Files modified: Existing pending frontend UI changes, `dist/AIHomeDashboardInstaller.exe`, `PROJECT_HANDOFF.md`.
 - Commands/tests run: Frontend production build, `scripts/Build-WindowsExe.ps1`, local-first source/artifact audits, payload ZIP inspection, Windows release manifest, installer lifecycle smoke test, hidden-window title/responsiveness check, `git diff --check`.
-- Result: `dist/AIHomeDashboardInstaller.exe` is refreshed at 53,021,882 bytes with SHA-256 `1424543C1FAE6E855EF88680F92EDE0708D5CEC129B1FC9E1E52A1F0ADBEFE11`; the payload has an empty data directory, safe example configs only, and no credential/database findings.
+- Result: `dist/AIHomeDashboardInstaller.exe` is refreshed from source commit `a9ba436` at 53,020,858 bytes with SHA-256 `23A4E6B213A4D88258681996351EF17EBC0E14DD37A662D1D6E558764FFE0682`; the payload has an empty data directory, safe example configs only, and no credential/database findings.
 - Risks/incomplete work: The installer is unsigned and may show an unknown-publisher warning. No actual install, upgrade, all-users elevation, shortcut, or uninstall flow was run during this smoke pass.
-- Next step: Commit and push the tracked UI and handoff files to `main`.
+- Next step: None.
 
 ### 2026-07-14 - Collapse Settings integrations and data tools
 
