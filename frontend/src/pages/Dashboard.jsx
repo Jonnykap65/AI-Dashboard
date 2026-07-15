@@ -97,7 +97,7 @@ function ProjectColumn({ projects, tasksByProject, status, label, draggingId, dr
     >
       <div className="mb-3 flex items-center justify-between gap-2">
         <h3 className="font-semibold">{label}</h3>
-        <Badge tone={status === 'completed' ? 'low' : status === 'in_progress' ? 'medium' : 'muted'}>{projects?.length || 0}</Badge>
+        <span className="text-xs font-medium text-slate-500">{projects?.length || 0} {(projects?.length || 0) === 1 ? 'project' : 'projects'}</span>
       </div>
       {!projects?.length ? (
         <div className="flex min-h-48 flex-1 items-center justify-center rounded-md border border-dashed border-line p-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
@@ -112,30 +112,28 @@ function ProjectColumn({ projects, tasksByProject, status, label, draggingId, dr
             draggable
             onDragStart={(event) => onDragStart(event, project)}
             onDragEnd={onDragEnd}
-            className={`cursor-grab rounded-md border border-line bg-white p-3 shadow-sm transition active:cursor-grabbing dark:border-slate-700 dark:bg-slate-900 ${draggingId === project.id ? 'scale-[0.98] opacity-40' : 'hover:border-pine hover:shadow'}`}
+            className={`cursor-grab rounded-md border border-line bg-white p-3 transition active:cursor-grabbing dark:border-slate-700 dark:bg-slate-900 ${draggingId === project.id ? 'scale-[0.98] opacity-40' : 'hover:border-slate-300 dark:hover:border-slate-600'}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <a draggable="false" className="truncate font-medium hover:text-pine hover:underline" href={`#/projects?project=${project.id}`}>{project.name}</a>
+                <a draggable="false" className="font-semibold underline-offset-2 hover:text-pine hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-pine" href={`#/projects?project=${project.id}`}>{project.name}</a>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <div className="flex flex-wrap justify-end gap-2">
-                  <Badge tone="muted">{projectTypeLabel(project.category)}</Badge>
-                  {project.priority && <Badge tone={project.priority}>{project.priority}</Badge>}
-                </div>
-                <span
-                  className="rounded p-1 text-slate-400"
-                  title={`Drag ${project.name} to another status`}
-                  aria-hidden="true"
-                >
-                  <GripVertical className="h-5 w-5" />
-                </span>
-              </div>
+              <span
+                className="shrink-0 rounded p-1 text-slate-400"
+                title={`Drag ${project.name} to another status`}
+                aria-hidden="true"
+              >
+                <GripVertical className="h-5 w-5" />
+              </span>
             </div>
-            <label className="mt-3 flex items-center justify-between gap-2 border-t border-line pt-2 text-xs text-slate-500 dark:border-slate-800">
-              <span>Move to</span>
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+              <div className="min-w-0"><dt className="label">Type</dt><dd className="mt-0.5 capitalize text-slate-700 dark:text-slate-200">{projectTypeLabel(project.category)}</dd></div>
+              <div className="min-w-0"><dt className="label">Priority</dt><dd className="mt-0.5 capitalize text-slate-700 dark:text-slate-200">{project.priority || 'None'}</dd></div>
+            </dl>
+            <label className="mt-3 grid gap-1 border-t border-line pt-3 dark:border-slate-800">
+              <span className="label">Project status</span>
               <select
-                className="rounded border border-line bg-transparent px-2 py-1 text-xs font-medium text-ink dark:border-slate-700 dark:text-slate-100"
+                className="input w-full text-sm"
                 value={project.status}
                 onChange={(event) => onStatusChange(project.id, event.target.value)}
               >
@@ -145,12 +143,13 @@ function ProjectColumn({ projects, tasksByProject, status, label, draggingId, dr
               </select>
             </label>
             {projectTasks.length > 0 && (
-              <div className="mt-3 grid gap-2">
+              <div className="mt-3 grid gap-2 border-t border-line pt-3 dark:border-slate-800">
+                <p className="label">Open tasks</p>
                 {projectTasks.slice(0, 3).map((task) => (
-                  <div key={task.id} className="rounded-md bg-slate-50 px-2 py-1.5 text-xs dark:bg-slate-950">
+                  <div key={task.id} className="border-t border-line pt-2 first:border-0 first:pt-0 dark:border-slate-800">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="min-w-0 truncate font-medium">{task.title}</span>
-                      <Badge tone={task.priority}>{task.priority}</Badge>
+                      <span className="min-w-0 truncate text-sm font-medium">{task.title}</span>
+                      <span className="shrink-0 text-xs capitalize text-slate-500">{task.priority || 'No priority'}</span>
                     </div>
                     {task.due_date && <p className="mt-1 text-slate-500">{task.due_date}</p>}
                   </div>

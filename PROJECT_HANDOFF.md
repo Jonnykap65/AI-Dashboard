@@ -2,11 +2,11 @@
 
 ## Current State
 
-Local-first AI Home Dashboard with a FastAPI backend and Vite frontend. Development services use `127.0.0.1:8000` and `127.0.0.1:5174`. The Windows installer is a branded WPF setup wizard with welcome, options, progress, and completion pages; the current packaged executable is `dist/AIHomeDashboardInstaller.exe`.
+Local-first AI Home Dashboard with a FastAPI backend and Vite frontend. Development services use `127.0.0.1:8000` and `127.0.0.1:5174`. Frontend disclosures share full-card, nested-panel, and record-detail controls; Settings keeps Google APIs, Apple Calendar, and Data Import / Export collapsed by default. Projects and the Project Status Dashboard use an information-first metadata and quiet-action hierarchy. The Windows installer is a branded WPF setup wizard; the current packaged executable is `dist/AIHomeDashboardInstaller.exe`.
 
 ## Last Session Summary
 
-Rebuilt and smoke-tested the Windows installer after consolidating and validating the pending dashboard, project, calendar, settings, navigation, and layout changes for publication on `main`.
+Rebuilt and smoke-tested the Windows installer with the completed disclosure and project UI improvements, audited the packaged payload, and prepared the tracked source changes for publication on `main`.
 
 ## Pending Tasks
 
@@ -17,6 +17,36 @@ None recorded.
 Keep the API loopback-bound; local credentials and application data must not be committed.
 
 ## Recent Session Notes
+
+### 2026-07-14 - Refresh installer with disclosure and project UI updates
+
+- Goal: Rebuild the Windows installer, validate the release artifact, and publish the completed UI changes.
+- Changes made: Rebuilt the Vite frontend, PyInstaller backend, WPF desktop payload, and final installer; audited the source, staged payload, and `dist` output; verified metadata, signature state, hash, window title, responsiveness, and cleanup.
+- Files modified: Existing pending frontend UI changes, `dist/AIHomeDashboardInstaller.exe`, `PROJECT_HANDOFF.md`.
+- Commands/tests run: Frontend production build, `scripts/Build-WindowsExe.ps1`, local-first source/artifact audits, payload ZIP inspection, Windows release manifest, installer lifecycle smoke test, hidden-window title/responsiveness check, `git diff --check`.
+- Result: `dist/AIHomeDashboardInstaller.exe` is refreshed at 53,021,882 bytes with SHA-256 `1424543C1FAE6E855EF88680F92EDE0708D5CEC129B1FC9E1E52A1F0ADBEFE11`; the payload has an empty data directory, safe example configs only, and no credential/database findings.
+- Risks/incomplete work: The installer is unsigned and may show an unknown-publisher warning. No actual install, upgrade, all-users elevation, shortcut, or uninstall flow was run during this smoke pass.
+- Next step: Commit and push the tracked UI and handoff files to `main`.
+
+### 2026-07-14 - Collapse Settings integrations and data tools
+
+- Goal: Make Google APIs, Apple Calendar, and Data Import / Export collapsible on Settings.
+- Changes made: Reused the shared full-card disclosure component for all three sections and added explicit default-closed state without changing forms, persistence, connection handlers, or import/export actions.
+- Files modified: `frontend/src/pages/SettingsPage.jsx`, `PROJECT_HANDOFF.md`.
+- Commands/tests run: Frontend production build, `git diff --check`, live default-state check, expand/collapse checks for all three sections, form-state retention check, dark-theme visual review, browser console check.
+- Result: All three cards start collapsed, remove their controls from the DOM while closed, and restore existing values when reopened.
+- Risks/incomplete work: Expansion state is session-local by design; no connection, credential, import, or export mutation was triggered during validation.
+- Next step: None.
+
+### 2026-07-14 - Shared disclosures and quiet project UI
+
+- Goal: Standardize all collapsible menus and clean up Projects plus the Project Status Dashboard tiles.
+- Changes made: Added shared full-card, nested-panel, and record-detail disclosure controls; removed collapsed filler; replaced repeated project-card button clusters with metadata-first layouts and quiet action rows; simplified dashboard project tiles while preserving drag-and-drop and status selection.
+- Files modified: `frontend/src/components/ui.jsx`, `frontend/src/pages/BillsPage.jsx`, `frontend/src/pages/CalendarPage.jsx`, `frontend/src/pages/Dashboard.jsx`, `frontend/src/pages/KnowledgeBasePage.jsx`, `frontend/src/pages/ProjectsPage.jsx`, `frontend/src/pages/SettingsPage.jsx`, `PROJECT_HANDOFF.md`.
+- Commands/tests run: Frontend production build, `git diff --check`, disclosure source inventory, live expand-collapse cycles, dark-theme visual review, 390 px responsive overflow check, browser console check.
+- Result: All explicit disclosures now share accessible Expand/Collapse text, chevrons, focus styling, `aria-expanded`, controlled regions, and unmounted collapsed content; project actions and status tiles are calmer and retain all prior behavior.
+- Risks/incomplete work: Expansion state remains session-local by design; native project drag-and-drop was preserved but not mutation-tested during this formatting-only pass.
+- Next step: None.
 
 ### 2026-07-12 - Refresh installer with consolidated app changes
 

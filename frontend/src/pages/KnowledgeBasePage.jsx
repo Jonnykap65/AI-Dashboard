@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, Download, Upload } from 'lucide-react';
+import { Download, Upload } from 'lucide-react';
 import EntityForm from '../components/EntityForm.jsx';
-import { Badge, Card, EmptyState, ErrorBox, Icons, Loading } from '../components/ui.jsx';
+import { Badge, Card, CollapsibleCard, DisclosurePanel, EmptyState, ErrorBox, Icons, Loading } from '../components/ui.jsx';
 import { api, downloadUrl } from '../lib/api.js';
 import { entityConfig } from '../lib/config.js';
 
@@ -295,22 +295,20 @@ export default function KnowledgeBasePage() {
           <EntityForm fields={linkConfig.fields} value={linkForm} onChange={setLinkForm} onSubmit={saveLink} onCancel={() => { setLinkForm(null); setEditingLink(null); }} submitLabel={editingLink ? 'Save changes' : 'Create'} />
         </Card>
       )}
-      <Card title="Links" action={<div className="flex flex-wrap items-center gap-2">
-        {showLinks && (
-          <>
-            <input className="input max-w-56" placeholder="Search links" value={linkQuery} onChange={(event) => setLinkQuery(event.target.value)} />
-            <select className="input max-w-48" value={linkCategory} onChange={(event) => setLinkCategory(event.target.value)}>
-              <option value="">All link categories</option>
-              {linkCategoryOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-            </select>
-          </>
-        )}
-        <button className="btn" type="button" onClick={() => setShowLinks((value) => !value)} aria-expanded={showLinks}>
-          <ChevronDown className={`h-4 w-4 transition ${showLinks ? 'rotate-180' : ''}`} />
-          {showLinks ? 'Collapse' : 'Expand'}
-        </button>
-      </div>}>
-        {!showLinks ? <EmptyState>Links collapsed.</EmptyState> : loading ? <Loading /> : visibleLinks.length === 0 ? <EmptyState>No links match these filters.</EmptyState> : (
+      <CollapsibleCard
+        title="Links"
+        description="Browse, search, and manage saved links."
+        open={showLinks}
+        onToggle={() => setShowLinks((value) => !value)}
+      >
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <input className="input max-w-56" placeholder="Search links" value={linkQuery} onChange={(event) => setLinkQuery(event.target.value)} />
+          <select className="input max-w-48" value={linkCategory} onChange={(event) => setLinkCategory(event.target.value)}>
+            <option value="">All link categories</option>
+            {linkCategoryOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </div>
+        {loading ? <Loading /> : visibleLinks.length === 0 ? <EmptyState>No links match these filters.</EmptyState> : (
           <div className="grid gap-3">
             {visibleLinks.map((link) => (
               <article key={link.id} className={`rounded-md border p-3 transition ${selectedLinkId === link.id ? 'border-pine bg-emerald-50/40 dark:border-emerald-700 dark:bg-emerald-950/20' : 'border-line hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-900/70'}`}>
@@ -360,27 +358,25 @@ export default function KnowledgeBasePage() {
             ))}
           </div>
         )}
-      </Card>
-      <Card title="Articles" action={<div className="flex flex-wrap items-center gap-2">
-        {showArticles && (
-          <>
-            <input className="input max-w-56" placeholder="Search Article" value={query} onChange={(event) => setQuery(event.target.value)} />
-            <select className="input max-w-48" value={category} onChange={(event) => setCategory(event.target.value)}>
-              <option value="">All categories</option>
-              {config.fields.find((field) => field.name === 'note_type').options.map((option) => <option key={option} value={option}>{option}</option>)}
-            </select>
-            <select className="input max-w-48" value={tag} onChange={(event) => setTag(event.target.value)}>
-              <option value="">All tags</option>
-              {tagOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-            </select>
-          </>
-        )}
-        <button className="btn" type="button" onClick={() => setShowArticles((value) => !value)} aria-expanded={showArticles}>
-          <ChevronDown className={`h-4 w-4 transition ${showArticles ? 'rotate-180' : ''}`} />
-          {showArticles ? 'Collapse' : 'Expand'}
-        </button>
-      </div>}>
-        {!showArticles ? <EmptyState>Articles collapsed.</EmptyState> : loading ? <Loading /> : visible.length === 0 ? <EmptyState>No KB articles match these filters.</EmptyState> : (
+      </CollapsibleCard>
+      <CollapsibleCard
+        title="Articles"
+        description="Browse, search, and manage knowledge base articles."
+        open={showArticles}
+        onToggle={() => setShowArticles((value) => !value)}
+      >
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <input className="input max-w-56" placeholder="Search articles" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <select className="input max-w-48" value={category} onChange={(event) => setCategory(event.target.value)}>
+            <option value="">All categories</option>
+            {config.fields.find((field) => field.name === 'note_type').options.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+          <select className="input max-w-48" value={tag} onChange={(event) => setTag(event.target.value)}>
+            <option value="">All tags</option>
+            {tagOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </div>
+        {loading ? <Loading /> : visible.length === 0 ? <EmptyState>No KB articles match these filters.</EmptyState> : (
           <div className="grid gap-3">
             {visible.map((item) => {
               const blocks = codeBlocks(item.body);
@@ -426,24 +422,16 @@ export default function KnowledgeBasePage() {
             })}
           </div>
         )}
-      </Card>
+      </CollapsibleCard>
       <Card title="Import / Export">
         <div className="grid gap-3">
-        <div className="rounded-md border border-line dark:border-slate-800">
-          <button
-            className="flex w-full items-center justify-between gap-3 p-3 text-left"
-            type="button"
-            onClick={() => setShowLinkTransfer((value) => !value)}
-            aria-expanded={showLinkTransfer}
-          >
-            <div>
-              <p className="text-sm font-semibold">Link import/export</p>
-              <p className="text-xs text-slate-500">Import links from a file, or download current link records.</p>
-            </div>
-            <ChevronDown className={`h-4 w-4 shrink-0 transition ${showLinkTransfer ? 'rotate-180' : ''}`} />
-          </button>
-          {showLinkTransfer && (
-            <div className="grid gap-4 border-t border-line p-3 dark:border-slate-800">
+        <DisclosurePanel
+          title="Link import/export"
+          description="Import links from a file, or download current link records."
+          open={showLinkTransfer}
+          onToggle={() => setShowLinkTransfer((value) => !value)}
+          contentClassName="grid gap-4"
+        >
               {linkImportMessage && <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{linkImportMessage}</div>}
               <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -490,24 +478,14 @@ export default function KnowledgeBasePage() {
                   </div>
                 </div>
               )}
-            </div>
-          )}
-        </div>
-        <div className="rounded-md border border-line dark:border-slate-800">
-          <button
-            className="flex w-full items-center justify-between gap-3 p-3 text-left"
-            type="button"
-            onClick={() => setShowArticleTransfer((value) => !value)}
-            aria-expanded={showArticleTransfer}
-          >
-            <div>
-              <p className="text-sm font-semibold">Article import/export</p>
-              <p className="text-xs text-slate-500">Import articles from a file, or download current article records.</p>
-            </div>
-            <ChevronDown className={`h-4 w-4 shrink-0 transition ${showArticleTransfer ? 'rotate-180' : ''}`} />
-          </button>
-          {showArticleTransfer && (
-            <div className="grid gap-4 border-t border-line p-3 dark:border-slate-800">
+        </DisclosurePanel>
+        <DisclosurePanel
+          title="Article import/export"
+          description="Import articles from a file, or download current article records."
+          open={showArticleTransfer}
+          onToggle={() => setShowArticleTransfer((value) => !value)}
+          contentClassName="grid gap-4"
+        >
               {importMessage && <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{importMessage}</div>}
               <div className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -542,9 +520,7 @@ export default function KnowledgeBasePage() {
                   </button>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+        </DisclosurePanel>
         </div>
       </Card>
     </div>

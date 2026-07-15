@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, Download, MailSearch, Upload } from 'lucide-react';
+import { Download, MailSearch, Upload } from 'lucide-react';
 import EntityPage from './EntityPage.jsx';
-import { Badge, Card, EmptyState, ErrorBox, Loading } from '../components/ui.jsx';
+import { Badge, Card, DisclosurePanel, EmptyState, ErrorBox, Loading } from '../components/ui.jsx';
 import { api, downloadUrl } from '../lib/api.js';
 import { entityConfig } from '../lib/config.js';
 
@@ -221,21 +221,13 @@ function ImportDiscoveryPanel({ onRefresh }) {
       <div className="grid gap-4">
         <ErrorBox message={error} />
         {message && <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{message}</div>}
-        <div className="rounded-md border border-line dark:border-slate-800">
-          <button
-            className="flex w-full items-center justify-between gap-3 p-3 text-left"
-            type="button"
-            onClick={() => setShowGmailSearch((value) => !value)}
-            aria-expanded={showGmailSearch}
-          >
-            <div>
-              <p className="text-sm font-semibold">Gmail bill search</p>
-              <p className="text-xs text-slate-500">{gmailStatus?.connected ? 'Connected' : gmailStatus?.configured ? 'Configured in Settings, connect Gmail there before importing' : 'Add the Google OAuth JSON and connect Gmail in Settings first'}</p>
-            </div>
-            <ChevronDown className={`h-4 w-4 shrink-0 transition ${showGmailSearch ? 'rotate-180' : ''}`} />
-          </button>
-          {showGmailSearch && (
-            <div className="grid gap-3 border-t border-line p-3 dark:border-slate-800">
+        <DisclosurePanel
+          title="Gmail bill search"
+          description={gmailStatus?.connected ? 'Connected' : gmailStatus?.configured ? 'Configured in Settings, connect Gmail there before importing' : 'Add the Google OAuth JSON and connect Gmail in Settings first'}
+          open={showGmailSearch}
+          onToggle={() => setShowGmailSearch((value) => !value)}
+          contentClassName="grid gap-3"
+        >
               <div className="grid gap-3 md:grid-cols-[160px_1fr_140px]">
                 <label className="grid gap-1 text-sm">
                   <span className="font-medium">Look back</span>
@@ -295,24 +287,14 @@ function ImportDiscoveryPanel({ onRefresh }) {
                   <MailSearch className="h-4 w-4" /> Search and import
                 </button>
               </div>
-            </div>
-          )}
-        </div>
-        <div className="rounded-md border border-line dark:border-slate-800">
-          <button
-            className="flex w-full items-center justify-between gap-3 p-3 text-left"
-            type="button"
-            onClick={() => setShowFileTransfer((value) => !value)}
-            aria-expanded={showFileTransfer}
-          >
-            <div>
-              <p className="text-sm font-semibold">File import / export</p>
-              <p className="text-xs text-slate-500">Import bills from a file, or download the current bill records.</p>
-            </div>
-            <ChevronDown className={`h-4 w-4 shrink-0 transition ${showFileTransfer ? 'rotate-180' : ''}`} />
-          </button>
-          {showFileTransfer && (
-            <div className="grid gap-4 border-t border-line p-3 dark:border-slate-800">
+        </DisclosurePanel>
+        <DisclosurePanel
+          title="File import / export"
+          description="Import bills from a file, or download the current bill records."
+          open={showFileTransfer}
+          onToggle={() => setShowFileTransfer((value) => !value)}
+          contentClassName="grid gap-4"
+        >
               <div className="grid gap-3">
                 <p className="text-sm font-semibold">File import</p>
                 <div className="grid gap-3 md:grid-cols-[1fr_auto]">
@@ -341,9 +323,7 @@ function ImportDiscoveryPanel({ onRefresh }) {
                   </button>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+        </DisclosurePanel>
       </div>
     </Card>
   );

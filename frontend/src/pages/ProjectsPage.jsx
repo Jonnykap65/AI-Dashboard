@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import EntityForm from '../components/EntityForm.jsx';
-import { Badge, Card, EmptyState, ErrorBox, Loading } from '../components/ui.jsx';
+import { Card, EmptyState, ErrorBox, Loading, QuietAction, RecordDetailsToggle, quietActionClass } from '../components/ui.jsx';
 import { api } from '../lib/api.js';
 import { entityConfig } from '../lib/config.js';
 
@@ -245,24 +244,26 @@ export default function ProjectsPage() {
                   const isExpanded = expandedProjects.has(project.id);
                   return (
                     <>
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h2 className="font-semibold">{project.name}</h2>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <Badge>{projectTypeLabel(project.category)}</Badge>
-                      <Badge tone={project.priority}>{project.priority}</Badge>
-                      <Badge tone="muted">{normalizedProjectStatus(project)}</Badge>
-                      {project.last_worked_at && <Badge tone="muted">worked {project.last_worked_at}</Badge>}
-                    </div>
+                    <p className="mt-1 line-clamp-2 text-sm text-slate-500">{project.goal || project.description || 'No goal set.'}</p>
                   </div>
-                  <button className="btn shrink-0" type="button" onClick={() => toggleProject(project.id)} aria-expanded={isExpanded} aria-controls={`project-details-${project.id}`}>
-                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    {isExpanded ? 'Collapse' : 'Expand'}
-                  </button>
+                  <RecordDetailsToggle
+                    open={isExpanded}
+                    onToggle={() => toggleProject(project.id)}
+                    controls={`project-details-${project.id}`}
+                    label={`${project.name} details`}
+                  />
                 </div>
+                <dl className="mt-3 grid gap-x-4 gap-y-2 text-xs sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="min-w-0"><dt className="label">Type</dt><dd className="mt-0.5 capitalize text-slate-700 dark:text-slate-200">{projectTypeLabel(project.category)}</dd></div>
+                  <div className="min-w-0"><dt className="label">Priority</dt><dd className="mt-0.5 capitalize text-slate-700 dark:text-slate-200">{project.priority || 'None'}</dd></div>
+                  <div className="min-w-0"><dt className="label">Status</dt><dd className="mt-0.5 capitalize text-slate-700 dark:text-slate-200">{normalizedProjectStatus(project).replaceAll('_', ' ')}</dd></div>
+                  <div className="min-w-0"><dt className="label">Last worked</dt><dd className="mt-0.5 text-slate-700 dark:text-slate-200">{project.last_worked_at || 'Not recorded'}</dd></div>
+                </dl>
                 {isExpanded && <div id={`project-details-${project.id}`}>
-                <p className="mt-3 text-sm text-slate-500">{project.goal || project.description || 'No goal set.'}</p>
-                <dl className="mt-3 grid gap-2 text-sm md:grid-cols-2">
+                <dl className="mt-4 grid gap-x-6 gap-y-3 border-t border-line pt-4 text-sm dark:border-slate-800 md:grid-cols-2">
                   <div><dt className="label">Next action</dt><dd>{project.next_action || project.next_step || 'None'}</dd></div>
                   <div><dt className="label">Blocker</dt><dd>{project.blocker || 'None'}</dd></div>
                   {project.due_date && <div><dt className="label">Target date</dt><dd><a className="font-medium text-pine underline-offset-2 hover:underline dark:text-emerald-300" href={`#/calendar?date=${project.due_date}`}>{project.due_date}</a></dd></div>}
@@ -274,37 +275,40 @@ export default function ProjectsPage() {
                     </>
                   )}
                 </dl>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button className="btn" onClick={() => setTaskForm({ ...entityConfig.projectTasks.empty, project_name: project.name })}>Add task</button>
-                  {project.frontend_command && <button className="btn" onClick={() => copyText(project.frontend_command)}>Copy frontend command</button>}
-                  {project.backend_command && <button className="btn" onClick={() => copyText(project.backend_command)}>Copy backend command</button>}
-                  {project.codex_prompt && <button className="btn" onClick={() => copyText(project.codex_prompt)}>Copy Codex prompt</button>}
-                  {(project.repo_url || project.repository_url) && <a className="btn" href={project.repo_url || project.repository_url} target="_blank" rel="noreferrer">Open repo</a>}
+                <div className="mt-4 border-t border-line pt-3 dark:border-slate-800">
+                  <p className="label">Project tools</p>
+                  <div className="mt-1 flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                    <QuietAction tone="positive" onClick={() => setTaskForm({ ...entityConfig.projectTasks.empty, project_name: project.name })}>Add task</QuietAction>
+                    {project.frontend_command && <QuietAction onClick={() => copyText(project.frontend_command)}>Copy frontend command</QuietAction>}
+                    {project.backend_command && <QuietAction onClick={() => copyText(project.backend_command)}>Copy backend command</QuietAction>}
+                    {project.codex_prompt && <QuietAction onClick={() => copyText(project.codex_prompt)}>Copy Codex prompt</QuietAction>}
+                    {(project.repo_url || project.repository_url) && <a className={quietActionClass} href={project.repo_url || project.repository_url} target="_blank" rel="noreferrer">Open repository</a>}
+                  </div>
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3 dark:border-slate-800">
-                  <button className="btn" onClick={() => action(`/api/projects/${project.id}/mark-worked`)}>Worked today</button>
-                  <button className="btn" onClick={() => { setEditing(project); setForm({ ...project }); }}>Edit</button>
-                  {project.status !== 'archived' && <button className="btn btn-danger" onClick={() => archive(project)}>Archive</button>}
-                  <button className="btn btn-danger" onClick={() => deleteProject(project)}>Delete</button>
+                <div className="mt-3 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 border-t border-line pt-3 dark:border-slate-800">
+                  <QuietAction tone="positive" onClick={() => action(`/api/projects/${project.id}/mark-worked`)}>Mark worked today</QuietAction>
+                  <QuietAction onClick={() => { setEditing(project); setForm({ ...project }); }}>Edit project</QuietAction>
+                  {project.status !== 'archived' && <QuietAction tone="destructive" onClick={() => archive(project)}>Archive project</QuietAction>}
+                  <QuietAction tone="destructive" onClick={() => deleteProject(project)}>Delete project</QuietAction>
                 </div>
                 <div className="mt-4 border-t border-line pt-3 dark:border-slate-800">
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <h3 className="text-sm font-semibold">Tasks</h3>
-                    <Badge tone="muted">{projectTasks.length}</Badge>
+                    <span className="text-xs font-medium text-slate-500">{projectTasks.length} {projectTasks.length === 1 ? 'task' : 'tasks'}</span>
                   </div>
                   {projectTasks.length === 0 ? <p className="text-sm text-slate-500">No open tasks for this project.</p> : (
                     <div className="grid gap-2">
                       {projectTasks.map((task) => (
-                        <div key={task.id} className="flex flex-wrap items-start justify-between gap-3 rounded-md border border-line p-3 dark:border-slate-800">
-                          <div>
+                        <article key={task.id} className="flex flex-wrap items-start justify-between gap-3 rounded-md border border-line p-3 dark:border-slate-800">
+                          <div className="min-w-0">
                             <p className="font-medium">{task.title}</p>
-                            <p className="text-sm text-slate-500">{task.due_date || 'No due date'}</p>
+                            <dl className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-xs">
+                              <div><dt className="label">Due</dt><dd className="mt-0.5 text-slate-700 dark:text-slate-200">{task.due_date || 'No due date'}</dd></div>
+                              <div><dt className="label">Priority</dt><dd className="mt-0.5 capitalize text-slate-700 dark:text-slate-200">{task.priority || 'None'}</dd></div>
+                            </dl>
                           </div>
-                          <div className="flex gap-2">
-                            <Badge tone={task.priority}>{task.priority}</Badge>
-                            <button className="btn" onClick={() => action(`/api/project-tasks/${task.id}/complete`)}>Complete</button>
-                          </div>
-                        </div>
+                          <QuietAction className="self-end" tone="positive" onClick={() => action(`/api/project-tasks/${task.id}/complete`)}>Mark complete</QuietAction>
+                        </article>
                       ))}
                     </div>
                   )}

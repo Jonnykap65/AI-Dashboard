@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { CalendarDays, ChevronDown, MailSearch } from 'lucide-react';
+import { CalendarDays, MailSearch } from 'lucide-react';
 import { api, downloadUrl } from '../lib/api.js';
-import { Card, ErrorBox, Loading } from '../components/ui.jsx';
+import { Card, CollapsibleCard, DisclosurePanel, ErrorBox, Loading } from '../components/ui.jsx';
 import { resolveTheme, themeOptions } from '../lib/themes.js';
 
 export default function SettingsPage({ onSaved }) {
@@ -15,6 +15,9 @@ export default function SettingsPage({ onSaved }) {
   const [applePassword, setApplePassword] = useState('');
   const [appleCalendars, setAppleCalendars] = useState([]);
   const [importText, setImportText] = useState('');
+  const [showGoogleApis, setShowGoogleApis] = useState(false);
+  const [showAppleCalendar, setShowAppleCalendar] = useState(false);
+  const [showDataTransfer, setShowDataTransfer] = useState(false);
   const [showGoogleInstructions, setShowGoogleInstructions] = useState(false);
   const [showAppleInstructions, setShowAppleInstructions] = useState(false);
   const [message, setMessage] = useState('');
@@ -205,7 +208,12 @@ export default function SettingsPage({ onSaved }) {
           })}
         </div>
       </Card>
-      <Card title="Google APIs">
+      <CollapsibleCard
+        title="Google APIs"
+        description="Manage shared OAuth credentials and connections for Calendar and Gmail."
+        open={showGoogleApis}
+        onToggle={() => setShowGoogleApis((value) => !value)}
+      >
         {googleConfig ? (
           <form onSubmit={saveGoogleConfig} className="grid gap-3">
             <div className="grid gap-3 md:grid-cols-2">
@@ -243,21 +251,13 @@ export default function SettingsPage({ onSaved }) {
               <span className="label">Google OAuth client JSON</span>
               <textarea className="input min-h-40 font-mono" value={googleJson} onChange={(e) => setGoogleJson(e.target.value)} placeholder="Paste the downloaded Google OAuth Desktop app JSON here" />
             </label>
-            <div className="rounded-md border border-line p-3 text-sm dark:border-slate-700">
-              <button
-                className="flex w-full items-center justify-between gap-3 text-left"
-                type="button"
-                onClick={() => setShowGoogleInstructions((value) => !value)}
-                aria-expanded={showGoogleInstructions}
-              >
-                <span>
-                  <span className="block font-semibold">How to regenerate Google API OAuth credentials</span>
-                  <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">Click to show the Google Cloud steps for Calendar and Gmail OAuth JSON.</span>
-                </span>
-                <ChevronDown className={`h-4 w-4 shrink-0 transition ${showGoogleInstructions ? 'rotate-180' : ''}`} />
-              </button>
-              {showGoogleInstructions && (
-                <div className="mt-3 grid gap-3 border-t border-line pt-3 text-slate-600 dark:border-slate-700 dark:text-slate-300">
+            <DisclosurePanel
+              title="How to regenerate Google API OAuth credentials"
+              description="Show the Google Cloud steps for Calendar and Gmail OAuth JSON."
+              open={showGoogleInstructions}
+              onToggle={() => setShowGoogleInstructions((value) => !value)}
+              contentClassName="grid gap-3 text-sm text-slate-600 dark:text-slate-300"
+            >
                   <ol className="grid list-decimal gap-2 pl-5">
                     <li>Open Google Cloud Console and select or create the project for this dashboard.</li>
                     <li>Go to APIs &amp; Services -&gt; Library, search for Google Calendar API and Gmail API, and enable both APIs you plan to use.</li>
@@ -271,9 +271,7 @@ export default function SettingsPage({ onSaved }) {
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Use OAuth Desktop client JSON here, not a simple API key. The app stores this local file under <code>backend\config\google-client-secret.json</code>; packaged builds use <code>dist\backend\config\google-client-secret.json</code>.
                   </p>
-                </div>
-              )}
-            </div>
+            </DisclosurePanel>
             <div className="flex flex-wrap gap-2">
               <button className="btn btn-primary" type="submit" disabled={!googleJson.trim()}>Save Google OAuth JSON</button>
             </div>
@@ -282,8 +280,13 @@ export default function SettingsPage({ onSaved }) {
             </p>
           </form>
         ) : <Loading />}
-      </Card>
-      <Card title="Apple Calendar">
+      </CollapsibleCard>
+      <CollapsibleCard
+        title="Apple Calendar"
+        description="Configure iCloud CalDAV access and test the saved connection."
+        open={showAppleCalendar}
+        onToggle={() => setShowAppleCalendar((value) => !value)}
+      >
         {appleConfig ? (
           <form onSubmit={saveAppleCalendar} className="grid gap-3 md:grid-cols-2">
             <label className="grid gap-1">
@@ -302,21 +305,14 @@ export default function SettingsPage({ onSaved }) {
               <span className="label">Default calendar name</span>
               <input className="input" value={appleConfig.calendar_name || ''} onChange={(e) => setAppleConfig({ ...appleConfig, calendar_name: e.target.value })} placeholder="Blank syncs all calendars" />
             </label>
-            <div className="rounded-md border border-line p-3 text-sm dark:border-slate-700 md:col-span-2">
-              <button
-                className="flex w-full items-center justify-between gap-3 text-left"
-                type="button"
-                onClick={() => setShowAppleInstructions((value) => !value)}
-                aria-expanded={showAppleInstructions}
-              >
-                <span>
-                  <span className="block font-semibold">How to create an Apple app-specific password</span>
-                  <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">Click to show the Apple Account steps for CalDAV access.</span>
-                </span>
-                <ChevronDown className={`h-4 w-4 shrink-0 transition ${showAppleInstructions ? 'rotate-180' : ''}`} />
-              </button>
-              {showAppleInstructions && (
-                <div className="mt-3 grid gap-3 border-t border-line pt-3 text-slate-600 dark:border-slate-700 dark:text-slate-300">
+            <DisclosurePanel
+              title="How to create an Apple app-specific password"
+              description="Show the Apple Account steps for CalDAV access."
+              open={showAppleInstructions}
+              onToggle={() => setShowAppleInstructions((value) => !value)}
+              className="md:col-span-2"
+              contentClassName="grid gap-3 text-sm text-slate-600 dark:text-slate-300"
+            >
                   <ol className="grid list-decimal gap-2 pl-5">
                     <li>Open <a className="link" href="https://account.apple.com/" target="_blank" rel="noreferrer">account.apple.com</a> and sign in with the Apple ID that owns the calendar.</li>
                     <li>Open Sign-In and Security, then select App-Specific Passwords.</li>
@@ -328,9 +324,7 @@ export default function SettingsPage({ onSaved }) {
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Do not use your normal Apple ID password here. If the password is lost or exposed, revoke it from App-Specific Passwords and generate a new one for this dashboard.
                   </p>
-                </div>
-              )}
-            </div>
+            </DisclosurePanel>
             <div className="flex flex-wrap gap-2 md:col-span-2">
               <button className="btn btn-primary" type="submit">Save Apple Calendar</button>
               <button className="btn" type="button" onClick={testAppleCalendar}>Test connection</button>
@@ -348,8 +342,13 @@ export default function SettingsPage({ onSaved }) {
             )}
           </form>
         ) : <Loading />}
-      </Card>
-      <Card title="Data Import / Export">
+      </CollapsibleCard>
+      <CollapsibleCard
+        title="Data Import / Export"
+        description="Export dashboard records or import a validated JSON backup."
+        open={showDataTransfer}
+        onToggle={() => setShowDataTransfer((value) => !value)}
+      >
         <div className="flex flex-wrap gap-2">
           <button className="btn" onClick={() => downloadUrl('/api/export')}>Export JSON</button>
           <button className="btn" onClick={() => downloadUrl('/api/export/bills.csv')}>Export Bills CSV</button>
@@ -360,7 +359,7 @@ export default function SettingsPage({ onSaved }) {
           <textarea className="input min-h-40" value={importText} onChange={(e) => setImportText(e.target.value)} placeholder="Paste exported JSON here. The backend validates before writing to SQLite." />
           <button className="btn btn-primary w-fit" onClick={importJson}>Import</button>
         </div>
-      </Card>
+      </CollapsibleCard>
       <Card title="Copyright">
         <div className="grid gap-2 text-sm text-slate-600 dark:text-slate-300">
           <p className="font-medium text-slate-900 dark:text-slate-100">Copyright © 2026 Jonathan Kaplan</p>

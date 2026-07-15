@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarSync, ChevronDown, ChevronLeft, ChevronRight, RefreshCw, Trash2 } from 'lucide-react';
-import { Badge, Card, ErrorBox, Loading } from '../components/ui.jsx';
+import { CalendarSync, ChevronLeft, ChevronRight, RefreshCw, Trash2 } from 'lucide-react';
+import { Badge, Card, DisclosurePanel, ErrorBox, Loading } from '../components/ui.jsx';
 import { api } from '../lib/api.js';
 
 function dateKey(value) {
@@ -373,21 +373,13 @@ export default function CalendarPage() {
         />
       )}
       <Card title="Calendar Sync">
-        <div className="rounded-md border border-line dark:border-slate-800">
-          <button
-            className="flex w-full items-center justify-between gap-3 p-3 text-left"
-            type="button"
-            onClick={() => setShowCalendarSync((value) => !value)}
-            aria-expanded={showCalendarSync}
-          >
-            <div>
-              <p className="text-sm font-semibold">Google and Apple Calendar Sync</p>
-              <p className="text-xs text-slate-500">Configure sync windows and run connected calendar imports.</p>
-            </div>
-            <ChevronDown className={`h-4 w-4 shrink-0 transition ${showCalendarSync ? 'rotate-180' : ''}`} />
-          </button>
-          {showCalendarSync && (
-            <div className="grid gap-4 border-t border-line p-3 dark:border-slate-800">
+        <DisclosurePanel
+          title="Google and Apple Calendar Sync"
+          description="Configure sync windows and run connected calendar imports."
+          open={showCalendarSync}
+          onToggle={() => setShowCalendarSync((value) => !value)}
+          contentClassName="grid gap-4"
+        >
               <section className="grid gap-3 rounded-md border border-line p-3 dark:border-slate-800">
                 <p className="text-sm font-semibold">Google Calendar Sync</p>
                 <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
@@ -451,9 +443,7 @@ export default function CalendarPage() {
               </section>
               {message && <p className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">{message}</p>}
               <ErrorBox message={error} />
-            </div>
-          )}
-        </div>
+        </DisclosurePanel>
       </Card>
     </div>
   );
