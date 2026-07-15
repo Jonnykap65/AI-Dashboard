@@ -9,6 +9,9 @@ desktop.ini
 .vscode/
 .idea/
 
+# Local project handoff notes.
+PROJECT_HANDOFF.md
+
 # Local runtime data and generated artifacts.
 backend/data/
 dist/
